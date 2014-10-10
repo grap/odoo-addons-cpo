@@ -27,7 +27,7 @@ from openerp.osv.orm import Model
 class product_product(Model):
     _inherit = 'product.product'
 
-    ### Private section
+    # Private section
     def _get_draft_outgoing_qty(
             self, cr, uid, ids, fields, arg, context=None):
         """ empty function.

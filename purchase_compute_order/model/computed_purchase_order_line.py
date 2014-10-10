@@ -328,7 +328,7 @@ class computed_purchase_order_line(Model):
             if parent_id:
                 cpo = self.pool.get('computed.purchase.order').browse(
                     cr, uid, parent_id, context=context)
-                #Check if the product is already in the list.
+                # Check if the product is already in the list.
                 products = [x.product_id.id for x in cpo.line_ids]
                 if product_id in products:
                     raise osv.except_osv(

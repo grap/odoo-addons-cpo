@@ -108,7 +108,7 @@ class update_products_line_wizard(TransientModel):
     _name = "update.products.line.wizard"
     _description = "Information about products to update"
 
-    ### Columns section
+    # Columns section
     _columns = {
         'wizard_id': fields.many2one(
             'update.products.wizard', 'Wizard Reference', select=True),
