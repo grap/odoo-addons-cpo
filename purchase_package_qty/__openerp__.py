@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
 ##############################################################################
 #
-#    Purchase Package Quantity for Odoo
-#    Copyright (C) 2013-2014 GRAP (http://www.grap.coop)
+#    Purchase - Package Quantity Module for Odoo
+#    Copyright (C) 2013-Today GRAP (http://www.grap.coop)
 #    @author Julien WESTE
 #    @author Sylvain LE GAL (https://twitter.com/legalsylvain)
 #
@@ -42,7 +42,7 @@ The supplier sells them with a price per unit, thus the purchase UoM is PCE.
 But the supplier put them in 6pcs boxes, and I have to buy a multiple of 6.
 
 Technical:
-----------------
+----------
 An init function will initialize this field by copying the values in the
 min_qty field as this one might have been used to figure the package qty.
 

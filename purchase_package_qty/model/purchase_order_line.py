@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
 ##############################################################################
 #
-#    Purchase Package Quantity for Odoo
-#    Copyright (C) 2013-2014 GRAP (http://www.grap.coop)
+#    Purchase - Package Quantity Module for Odoo
+#    Copyright (C) 2013-Today GRAP (http://www.grap.coop)
 #    @author Julien WESTE
 #    @author Sylvain LE GAL (https://twitter.com/legalsylvain)
 #
@@ -24,7 +24,6 @@
 from math import ceil
 
 from openerp.osv.orm import Model
-from openerp.osv import fields
 from openerp.tools.translate import _
 
 
@@ -76,7 +75,6 @@ class purchase_order_line(Model):
         if product_id:
             product_obj = self.pool.get('product.product')
             product = product_obj.browse(cr, uid, product_id, context=context)
-            supplierinfo = False
             for supplier in product.seller_ids:
                 if partner_id and (supplier.name.id == partner_id):
                     package_qty = supplier.package_qty
@@ -88,8 +86,8 @@ class purchase_order_line(Model):
                             'message': _(
                                 """The selected supplier only sells"""
                                 """this product by %s %s""") % (
-                                    supplier.package_qty,
-                                    supplier.product_uom.name)}
+                                supplier.package_qty,
+                                supplier.product_uom.name)}
                         qty = ceil(qty / package_qty) * package_qty
                         res['value'].update({'product_qty': qty})
         return res
