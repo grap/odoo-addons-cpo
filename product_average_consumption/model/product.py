@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Product - Average Consumption Module for Odoo
-#    Copyright (C) 2013-2014 GRAP (http://www.grap.coop)
+#    Copyright (C) 2013-Today GRAP (http://www.grap.coop)
 #    @author Julien WESTE
 #    @author Sylvain LE GAL (https://twitter.com/legalsylvain)
 #
@@ -25,28 +25,27 @@ import time
 import datetime
 from openerp.osv import fields
 from openerp.osv.orm import Model
-from openerp.tools.translate import _
 
 
 class product_product(Model):
     _inherit = "product.product"
 
+    # Private Function Section
     def _min_date(self, cr, uid, product_id, context=None):
         query = """SELECT to_char(min(date), 'YYYY-MM-DD') \
                 from stock_move where product_id = %s""" % (product_id)
         cr.execute(query)
         results = cr.fetchall()
         return results and results[0] and results[0][0] \
-                or time.strftime('%Y-%m-%d')
+            or time.strftime('%Y-%m-%d')
 
+    # Fields Function Section
     def _average_consumption(self, cr, uid, ids, fields, arg, context=None):
         result = {}
-        stock_move_obj = self.pool.get('stock.move')
-        total_consumption = 0
         first_date = time.strftime('%Y-%m-%d')
-        begin_date = (datetime.datetime.today()
-                    - datetime.timedelta(days=365))\
-                    .strftime('%Y-%m-%d')
+        begin_date = (
+            datetime.datetime.today()
+            - datetime.timedelta(days=365)).strftime('%Y-%m-%d')
 
         if context is None:
             context = {}
@@ -64,28 +63,34 @@ class product_product(Model):
                 self._min_date(cr, uid, product.id, context=c)
                 )
             nb_days = (
-                    datetime.datetime.today()
-                    - datetime.datetime.strptime(first_date, '%Y-%m-%d')
-                    ).days
+                datetime.datetime.today()
+                - datetime.datetime.strptime(first_date, '%Y-%m-%d')
+                ).days
             result[product.id] = {
-                'average_consumption': nb_days
-                                    and - stock[product.id] / nb_days
-                                    or False,
+                'average_consumption': (
+                    nb_days
+                    and - stock[product.id] / nb_days
+                    or False),
                 'total_consumption': - stock[product.id] or False,
                 'nb_days': nb_days or False,
             }
         return result
 
+    # Columns Section
     _columns = {
-        'average_consumption': fields.function(_average_consumption,
-            type='float', string='Average Consumption per day',
-            multi="average_consumption"),
-        'total_consumption': fields.function(_average_consumption,
-            type='float', string='Total Consumption',
-            multi="average_consumption"),
-        'nb_days': fields.function(_average_consumption,
-            type='float', string='Number of days for the calculation',
-            multi="average_consumption",
-            help="The calculation will be done for the last 365 days or since \
-            the first purchase or sale of the product if it's more recent"),
+        'average_consumption': fields.function(
+            _average_consumption, type='float',
+            string='Average Consumption per day',
+            multi='average_consumption'),
+        'total_consumption': fields.function(
+            _average_consumption, type='float',
+            string='Total Consumption',
+            multi='average_consumption'),
+        'nb_days': fields.function(
+            _average_consumption, type='float',
+            string='Number of days for the calculation',
+            multi='average_consumption',
+            help="""The calculation will be done for the last 365 days or"""
+            """ since the first purchase or sale of the product if it's"""
+            """ more recent"""),
     }
