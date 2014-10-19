@@ -51,7 +51,7 @@ class computed_purchase_order_line(Model):
             res[cpol.id] = {
                 'incoming_qty': cpol.product_id.incoming_qty,
                 'outgoing_qty': cpol.product_id.outgoing_qty,
-                }
+            }
         return res
 
     def _get_draft_qty(self, cr, uid, ids, field_name, arg, context=None):
@@ -60,7 +60,7 @@ class computed_purchase_order_line(Model):
             res[cpol.id] = {
                 'draft_incoming_qty': cpol.product_id.draft_incoming_qty,
                 'draft_outgoing_qty': cpol.product_id.draft_outgoing_qty,
-                }
+            }
         return res
 
     def _get_computed_qty(self, cr, uid, ids, field_name, arg, context=None):
@@ -100,14 +100,14 @@ class computed_purchase_order_line(Model):
                     'product_name_inv': None,
                     'product_price_inv': 0.0,
                     'package_quantity_inv': 0.0,
-                    }
+                }
             elif cpol.state in ('updated', 'new'):
                 res[cpol.id] = {
                     'product_code_inv': cpol.product_code,
                     'product_name_inv': cpol.product_name,
                     'product_price_inv': cpol.product_price,
                     'package_quantity_inv': cpol.package_quantity,
-                    }
+                }
             else:
                 psi_ids = psi_obj.search(
                     cr, uid, [
@@ -126,7 +126,7 @@ class computed_purchase_order_line(Model):
                             and psi.pricelist_ids[0].price
                             or psi.product_id.standard_price),
                         'package_quantity_inv': psi.package_qty
-                        }
+                    }
         return res
 
     def _set_product_code(
@@ -255,8 +255,7 @@ class computed_purchase_order_line(Model):
         'stock_duration': fields.function(
             _compute_stock_duration, string='Stock Duration (Days)',
             type='float', readonly='True',
-            help="Number of days the stock should last.",
-            ),
+            help="Number of days the stock should last."),
         'purchase_qty': fields.float(
             'Quantity to purchase', required=True,
             help="The quantity you should purchase."),
@@ -272,23 +271,19 @@ class computed_purchase_order_line(Model):
         'incoming_qty': fields.function(
             _get_qty, type='float', string='Incoming Quantity',
             help="Virtual incoming entries", multi='get_qty',
-            store=True
-            ),
+            store=True),
         'outgoing_qty': fields.function(
             _get_qty, type='float', string='Outgoing Quantity',
             help="Virtual outgoing entries", multi='get_qty',
-            store=True
-            ),
+            store=True),
         'draft_incoming_qty': fields.function(
             _get_draft_qty, type='float', string='Draft Incoming Quantity',
             help="Draft purchases", multi='get_draft_qty',
-            store=True
-            ),
+            store=True),
         'draft_outgoing_qty': fields.function(
             _get_draft_qty, type='float', string='Draft Outgoing Quantity',
             help="Draft sales", multi='get_draft_qty',
-            store=True
-            ),
+            store=True),
         'computed_qty': fields.function(
             _get_computed_qty, type='float', string='Stock',
             help="The sum of all quantities selected.",

@@ -71,7 +71,7 @@ class computed_purchase_order(Model):
             res[cpo.id] = {
                 'computed_amount': amount,
                 'computed_duration': min_duration,
-                }
+            }
         return res
 
     def _get_products_updated(
@@ -172,14 +172,14 @@ class computed_purchase_order(Model):
         vals = {
             'purchase_target': 0,
             'target_type': 'product_price_inv',
-            }
+        }
         if partner_id:
             partner_obj = self.pool.get('res.partner')
             partner = partner_obj.browse(cr, uid, partner_id, context=context)
             vals = {
                 'purchase_target': partner.purchase_target,
                 'target_type': partner.target_type,
-                }
+            }
         if ids:
             cpo = self.browse(cr, uid, ids, context=context)[0]
             vals['line_ids'] = map(lambda x: (2, x.id, False), cpo.line_ids)
@@ -220,7 +220,7 @@ class computed_purchase_order(Model):
                     'computed_qty',
                     'stock_duration',
                     'manual_input_output_qty',
-                    ]
+                ]
             for value in line_ids:
                 if len(value) > 2 and value[2] and isinstance(value[2], dict)\
                         and (set(need_sorting_fields) & set(value[2].keys())):
@@ -376,7 +376,7 @@ class computed_purchase_order(Model):
                         'package_quantity': psi.package_qty or psi.min_qty,
                         'average_consumption': pp.average_consumption,
                         'uom_po_id': psi.product_uom.id,
-                        }))
+                    }))
             # update line_ids
             self.write(
                 cr, uid, cpo.id, {'line_ids': cpol_list}, context=context)

@@ -49,7 +49,7 @@ class update_products_wizard(TransientModel):
                     ('name', '=',
                         line.computed_purchase_order_id.partner_id.id),
                     ('product_id', '=', line.product_id.product_tmpl_id.id)
-                    ], context=context)[0]
+                ], context=context)[0]
 
                 line_ids.append((0, 0, {
                     'product_id': line.product_id.id,
@@ -60,7 +60,7 @@ class update_products_wizard(TransientModel):
                     'package_qty': line.package_quantity,
                     'price': line.product_price,
                     'computed_purchase_order_line_id': line.id,
-                    }))
+                }))
             res.update({'line_ids': line_ids})
         return res
 
@@ -93,7 +93,7 @@ class update_products_wizard(TransientModel):
                         'suppinfo_id': line.supplierinfo_id.id,
                         'min_quantity': 0,
                         'price': line.price,
-                        })],
+                    })],
                 }
                 psi_obj.write(
                     cr, uid, [line.supplierinfo_id.id], values,

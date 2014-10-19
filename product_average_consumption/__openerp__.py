@@ -46,5 +46,5 @@ Copyright, Author and Licence :
     ],
     'data': [
         'view/view.xml',
-        ],
+    ],
 }

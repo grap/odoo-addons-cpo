@@ -54,18 +54,18 @@ class product_product(Model):
             'states': ('confirmed', 'waiting', 'assigned', 'done'),
             'what': ('out', ),
             'from_date': begin_date
-            })
+        })
         stock = self.get_product_available(cr, uid, ids, context=c)
 
         for product in self.browse(cr, uid, ids, context=context):
             first_date = max(
                 begin_date,
                 self._min_date(cr, uid, product.id, context=c)
-                )
+            )
             nb_days = (
                 datetime.datetime.today()
                 - datetime.datetime.strptime(first_date, '%Y-%m-%d')
-                ).days
+            ).days
             result[product.id] = {
                 'average_consumption': (
                     nb_days

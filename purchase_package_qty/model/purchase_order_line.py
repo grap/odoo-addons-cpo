@@ -48,8 +48,8 @@ class purchase_order_line(Model):
             if not found:
                 return True
             if not indicative:
-                if (int(pol.product_qty/package_qty) !=
-                        pol.product_qty/package_qty):
+                if (int(pol.product_qty / package_qty) !=
+                        pol.product_qty / package_qty):
                     return False
         return True
 
@@ -60,7 +60,7 @@ class purchase_order_line(Model):
             """ change the package settings in the supplierinfo of the"""
             """ product.""",
             ['package_qty']),
-        ]
+    ]
 
     # Views section
     def onchange_product_id(
@@ -80,7 +80,7 @@ class purchase_order_line(Model):
                     package_qty = supplier.package_qty
                     indicative = supplier.indicative_package
                     if (not(indicative) and
-                            int(qty/package_qty) != qty/package_qty):
+                            int(qty / package_qty) != qty / package_qty):
                         res['warning'] = {
                             'title': _('Warning!'),
                             'message': _(

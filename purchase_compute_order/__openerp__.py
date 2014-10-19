@@ -97,5 +97,5 @@ Copyright, Author and Licence :
         'view/action.xml',
         'view/view.xml',
         'view/menu.xml',
-        ],
+    ],
 }
