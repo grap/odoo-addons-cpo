@@ -30,9 +30,6 @@ class product_product(Model):
     # Private section
     def _get_draft_outgoing_qty(
             self, cr, uid, ids, fields, arg, context=None):
-        """ empty function.
-            Please Overload this function, in glue module.
-        """
         res = super(product_product, self)._get_draft_outgoing_qty(
             cr, uid, ids, fields, arg, context=context)
         pol_obj = self.pool.get('pos.order.line')
