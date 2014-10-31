@@ -11,12 +11,12 @@
             <field name="model">computed.purchase.order</field>
             <field name="arch" type="xml">
                 <form string="Computed Purchase Order" version="7.0">
-                    <sheet>
-                        <header>
+                    <header>
                             <button name="make_order" states="draft" string="Make Purchase Order" type="object" class="oe_highlight"/>
                             <button name="%(action_view_update_products)d" string="Update Products" type="action" class="oe_highlight" attrs="{'invisible':[('products_updated','=',False)]}"/>
                             <field name="state" widget="statusbar" statusbar_visible="draft,done,canceled" statusbar_colors='{"canceled":"red","done":"blue"}' readonly="1"/>
-                        </header>
+                    </header>
+                    <sheet>
                             <group colspan="8" col="2">
                                 <h1>
                                     <label string="Computed Purchase Order" class="oe_title"/>
@@ -26,6 +26,9 @@
                         <group col="7">
                             <group colspan="3" col="2">
                                 <field name="partner_id" on_change="onchange_partner_id(partner_id)"/>
+                                <field name="product_price" required="1"/>
+                                <field name="created_date" readonly="1"/>
+                                <field name="confirm_date" readonly="1"/>
                             </group>
                             <field name="incoming_date"/>
                             <field name="purchase_order_id" states="done"/>
@@ -47,6 +50,7 @@
                             <group string="Compute Order" colspan="3" col="3">
                                 <field name="purchase_target"/>
                                 <field name="target_type" nolabel="1"/>
+                                <field name="growth_factor" />
                             </group>
                             <group colspan="1">
                                 <button name="compute_purchase_quantities" 
@@ -119,6 +123,7 @@
                     <field name="name"/>
                     <field name="partner_id"/>
                     <field name="incoming_date"/>
+                    <field name="confirm_date" invisible="1"/>
                     <field name="company_id" groups="base.group_multi_company"/>
                     <field name="state"/>
                 </tree>
@@ -136,6 +141,11 @@
                     <field name="state"/>
                     <filter icon="terp-document-new" name="draft" string="Draft" domain="[('state','=','draft')]" help="Computations in draft state"/>
                     <filter icon="terp-check" name="done" string="Converted" domain="[('state','=','done')]" help="Computations already converted into purchase orders"/>
+                    <group expand="0" string="Group By...">
+                    <filter string="Provider" domain="[]" context="{'group_by':'partner_id'}"/>
+                    <filter string="Confirm Date" domain="[]" context="{'group_by':'confirm_date'}"/>
+                    <filter string="State" domain="[]" context="{'group_by':'state'}"/>
+                    </group>
                 </search>
             </field>
         </record>

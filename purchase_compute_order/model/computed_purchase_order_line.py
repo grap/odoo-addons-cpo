@@ -89,6 +89,54 @@ class computed_purchase_order_line(Model):
                 res[x['id']] += sum([x[f] for f in fields])
         return res
 
+    def _product_price_based_on(
+            self, cr, uid, ids, pricelist=False, context=None):
+
+        pool_purchase_line = self.pool['purchase.order.line']
+        psi_obj = self.pool['product.supplierinfo']
+
+        for cpol in self.browse(cr, uid, ids, context=context):
+            unit_price = cpol.product_price
+            cpo_product_price = cpol.computed_purchase_order_id.product_price
+            cpo_partner_id = cpol.computed_purchase_order_id.partner_id.id
+
+            if pricelist:
+                psi_ids = psi_obj.search(
+                    cr, uid, [
+                        ('name', '=',
+                            cpo_partner_id),
+                        ('product_id', '=',
+                            cpol.product_id.product_tmpl_id.id)],
+                    context=context)
+                if psi_ids:
+                    psi = psi_obj.browse(cr, uid, psi_ids[0], context=context)
+                    unit_price = (
+                        psi.pricelist_ids
+                        and psi.pricelist_ids[0].price
+                        or psi.product_id.standard_price)
+
+            if cpo_product_price == 'last_purchase':
+                purch_line_id = pool_purchase_line.search(
+                    cr, uid, [('product_id', '=', cpol.product_id.id)],
+                    limit=1, order='date_planned desc', context=context)
+                if purch_line_id:
+                    purch_line_price = pool_purchase_line.read(
+                        cr, uid, purch_line_id, ['price_unit'],
+                        context=context)
+                    unit_price = purch_line_price[0]['price_unit']
+
+            if cpo_product_price == 'last_purchase_supplier':
+                purch_line_id = pool_purchase_line.search(
+                    cr, uid, [('product_id', '=', cpol.product_id.id),
+                              ('partner_id', '=', cpo_partner_id)],
+                    limit=1, order='date_planned desc', context=context)
+                if purch_line_id:
+                    purch_line_price = pool_purchase_line.read(
+                        cr, uid, purch_line_id, ['price_unit'],
+                        context=context)
+                    unit_price = purch_line_price[0]['price_unit']
+        return unit_price
+
     def _get_product_information(
             self, cr, uid, ids, field_names, arg, context=None):
         res = {}
@@ -105,7 +153,8 @@ class computed_purchase_order_line(Model):
                 res[cpol.id] = {
                     'product_code_inv': cpol.product_code,
                     'product_name_inv': cpol.product_name,
-                    'product_price_inv': cpol.product_price,
+                    'product_price_inv': self._product_price_based_on(
+                        cr, uid, [cpol.id], context=context),
                     'package_quantity_inv': cpol.package_quantity,
                     }
             else:
@@ -121,10 +170,8 @@ class computed_purchase_order_line(Model):
                     res[cpol.id] = {
                         'product_code_inv': psi.product_code,
                         'product_name_inv': psi.product_name,
-                        'product_price_inv': (
-                            psi.pricelist_ids
-                            and psi.pricelist_ids[0].price
-                            or psi.product_id.standard_price),
+                        'product_price_inv': self._product_price_based_on(
+                            cr, uid, [cpol.id], True, context=context),
                         'package_quantity_inv': psi.package_qty
                         }
         return res

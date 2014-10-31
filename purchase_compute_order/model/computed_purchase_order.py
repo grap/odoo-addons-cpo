@@ -27,6 +27,8 @@ from openerp.osv import fields, osv
 from openerp.osv.orm import Model
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
+import datetime
+import time
 
 
 class computed_purchase_order(Model):
@@ -150,6 +152,16 @@ class computed_purchase_order(Model):
         'products_updated': fields.function(
             _get_products_updated, type='boolean',
             string='Indicate if there were any products updated in the list'),
+        'created_date': fields.date(
+            'Create Date'),
+        'confirm_date': fields.date(
+            'Confirm Date'),
+        'growth_factor': fields.float('Growth Factor'),
+        'product_price': fields.selection(
+            [('product_price', 'Product price'),
+                ('last_purchase', 'Last purchase price'),
+                ('last_purchase_supplier', 'Last purchase of the supplier')],
+            'Product price based on'),
     }
 
     # Defaults section
@@ -164,6 +176,9 @@ class computed_purchase_order(Model):
         'compute_draft_quantity': True,
         'target_type': 'product_price_inv',
         'purchase_target': 0,
+        'created_date': lambda *a: time.strftime('%Y-%m-%d'),
+        'product_price': 'product_price',
+
     }
 
     # View Section
@@ -284,15 +299,22 @@ class computed_purchase_order(Model):
         cpo = self.browse(cr, uid, id, context=context)
         days = cpo.purchase_target
         for line in cpo.line_ids:
+
             if line.average_consumption:
                 quantity = max(
                     days * line.average_consumption * line.uom_po_id.factor
                     / line.uom_id.factor - line.computed_qty, 0)
+
+                if cpo.growth_factor != 0:
+                    quantity_growth_factor = quantity * cpo.growth_factor / 100
+                    quantity = quantity + round(quantity_growth_factor)
+
                 if line.package_quantity and quantity % line.package_quantity:
                     quantity = ceil(quantity / line.package_quantity)\
                         * line.package_quantity
             else:
                 quantity = line.package_quantity or 0
+
             cpol_obj.write(
                 cr, uid, line.id, {'purchase_qty': quantity}, context=context)
         return True
@@ -419,7 +441,11 @@ class computed_purchase_order(Model):
         }
         po_id = po_obj.create(cr, uid, po_values, context=context)
         self.write(
-            cr, uid, id, {'state': 'done', 'purchase_order_id': po_id},
+            cr, uid, id, {
+                'state': 'done',
+                'purchase_order_id': po_id,
+                'confirm_date': datetime.datetime.now()
+            },
             context=context)
 
         mod_obj = self.pool.get('ir.model.data')
