@@ -26,7 +26,6 @@
         <record id="view_update_products_line_form" model="ir.ui.view">
             <field name="name">update.products.line.wizard.tree</field>
             <field name="model">update.products.line.wizard</field>
-            <field name="type">tree</field>
             <field name="arch" type="xml">
                 <tree string="Product Information" editable="top">
                     <field name="product_id"/>
