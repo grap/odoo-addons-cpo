@@ -31,10 +31,10 @@ class update_products_wizard(TransientModel):
     _description = 'Update product_supplierinfo from compute_purchase_order'
 
     # Overload section
-    def default_get(self, cr, uid, fields, context):
+    def default_get(self, cr, uid, fields_name, context):
         line_ids = []
         res = super(update_products_wizard, self).default_get(
-            cr, uid, fields, context=context)
+            cr, uid, fields_name, context=context)
         active_id = context.get('active_id', False)
         if active_id:
             psi_obj = self.pool.get('product.supplierinfo')

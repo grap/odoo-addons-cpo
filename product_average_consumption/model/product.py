@@ -40,7 +40,8 @@ class product_product(Model):
             or time.strftime('%Y-%m-%d')
 
     # Fields Function Section
-    def _average_consumption(self, cr, uid, ids, fields, arg, context=None):
+    def _average_consumption(
+            self, cr, uid, ids, fields_name, arg, context=None):
         result = {}
         first_date = time.strftime('%Y-%m-%d')
         begin_date = (

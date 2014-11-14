@@ -77,16 +77,16 @@ class computed_purchase_order_line(Model):
             if use_pending_qties and use_draft_qties:
                 break
 
-        fields = []
+        fields_list = []
         if use_pending_qties:
-            fields += ['incoming_qty', 'outgoing_qty']
+            fields_list += ['incoming_qty', 'outgoing_qty']
         if use_draft_qties:
-            fields += ['draft_incoming_qty', 'draft_outgoing_qty']
+            fields_list += ['draft_incoming_qty', 'draft_outgoing_qty']
 
-        if fields:
-            qties = self.read(cr, uid, ids, fields, context=context)
+        if fields_list:
+            qties = self.read(cr, uid, ids, fields_list, context=context)
             for x in qties:
-                res[x['id']] += sum([x[f] for f in fields])
+                res[x['id']] += sum([x[f] for f in fields_list])
         return res
 
     def _get_product_information(

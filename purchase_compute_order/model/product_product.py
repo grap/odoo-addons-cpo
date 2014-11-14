@@ -30,14 +30,14 @@ class product_product(Model):
 
     # Field Function section
     def _get_draft_incoming_qty_column(
-            self, cr, uid, ids, fields, arg, context=None):
+            self, cr, uid, ids, fields_name, arg, context=None):
         return self._get_draft_incoming_qty(
-            cr, uid, ids, fields, arg, context=context)
+            cr, uid, ids, fields_name, arg, context=context)
 
     def _get_draft_outgoing_qty_column(
-            self, cr, uid, ids, fields, arg, context=None):
+            self, cr, uid, ids, fields_name, arg, context=None):
         return self._get_draft_outgoing_qty(
-            cr, uid, ids, fields, arg, context=context)
+            cr, uid, ids, fields_name, arg, context=context)
 
     _columns = {
         'draft_incoming_qty': fields.function(
@@ -49,7 +49,8 @@ class product_product(Model):
     }
 
     # Private section
-    def _get_draft_incoming_qty(self, cr, uid, ids, fields, arg, context=None):
+    def _get_draft_incoming_qty(
+            self, cr, uid, ids, fields_name, arg, context=None):
         """ Compute incoming qty of products in draft purchase order.
             You can overload this function, in glue module.
         """
@@ -70,7 +71,8 @@ class product_product(Model):
             res[pp.id] = draft_qty.get(pp.id, 0)
         return res
 
-    def _get_draft_outgoing_qty(self, cr, uid, ids, fields, arg, context=None):
+    def _get_draft_outgoing_qty(
+            self, cr, uid, ids, fields_name, arg, context=None):
         """ empty function.
             Please Overload this function, in glue module.
         """
