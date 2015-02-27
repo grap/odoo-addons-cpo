@@ -45,8 +45,8 @@ class product_product(Model):
         result = {}
         first_date = time.strftime('%Y-%m-%d')
         begin_date = (
-            datetime.datetime.today()
-            - datetime.timedelta(days=365)).strftime('%Y-%m-%d')
+            datetime.datetime.today() -
+            datetime.timedelta(days=365)).strftime('%Y-%m-%d')
 
         if context is None:
             context = {}
@@ -64,14 +64,13 @@ class product_product(Model):
                 self._min_date(cr, uid, product.id, context=c)
             )
             nb_days = (
-                datetime.datetime.today()
-                - datetime.datetime.strptime(first_date, '%Y-%m-%d')
+                datetime.datetime.today() -
+                datetime.datetime.strptime(first_date, '%Y-%m-%d')
             ).days
             result[product.id] = {
                 'average_consumption': (
-                    nb_days
-                    and - stock[product.id] / nb_days
-                    or False),
+                    nb_days and
+                    (- stock[product.id] / nb_days) or False),
                 'total_consumption': - stock[product.id] or False,
                 'nb_days': nb_days or False,
             }

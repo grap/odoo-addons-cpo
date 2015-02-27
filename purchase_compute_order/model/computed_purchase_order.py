@@ -261,10 +261,10 @@ class computed_purchase_order(Model):
             if line.purchase_qty != 0:
                 line_values = {
                     'name': "%s%s" % (
-                        line.product_code_inv
-                            and '[' + line.product_code_inv + '] ' or '',
-                        line.product_name_inv
-                            or line.product_id.name_template),
+                        line.product_code_inv and
+                            '[' + line.product_code_inv + '] ' or '',
+                        line.product_name_inv or
+                            line.product_id.name_template),
                     'product_qty': line.purchase_qty,
                     'date_planned': (
                         cpo.incoming_date or fields.date.context_today(
@@ -286,11 +286,11 @@ class computed_purchase_order(Model):
         for line in cpo.line_ids:
             if line.average_consumption:
                 quantity = max(
-                    days * line.average_consumption * line.uom_po_id.factor
-                    / line.uom_id.factor - line.computed_qty, 0)
+                    days * line.average_consumption * line.uom_po_id.factor /
+                    line.uom_id.factor - line.computed_qty, 0)
                 if line.package_quantity and quantity % line.package_quantity:
-                    quantity = ceil(quantity / line.package_quantity)\
-                        * line.package_quantity
+                    quantity = ceil(quantity / line.package_quantity) *\
+                        line.package_quantity
             else:
                 quantity = line.package_quantity or 0
             cpol_obj.write(
@@ -318,9 +318,9 @@ class computed_purchase_order(Model):
             for line in cpo.line_ids:
                 if line.average_consumption:
                     quantity = max(
-                        days * line.average_consumption
-                        * line.uom_po_id.factor / line.uom_id.factor
-                        - line.computed_qty, 0)
+                        days * line.average_consumption *
+                        line.uom_po_id.factor / line.uom_id.factor -
+                        line.computed_qty, 0)
                     if line.package_quantity and\
                             quantity % line.package_quantity:
                         quantity = ceil(quantity / line.package_quantity)\

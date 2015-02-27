@@ -122,9 +122,9 @@ class computed_purchase_order_line(Model):
                         'product_code_inv': psi.product_code,
                         'product_name_inv': psi.product_name,
                         'product_price_inv': (
-                            psi.pricelist_ids
-                            and psi.pricelist_ids[0].price
-                            or psi.product_id.standard_price),
+                            psi.pricelist_ids and
+                            psi.pricelist_ids[0].price or
+                            psi.product_id.standard_price),
                         'package_quantity_inv': psi.package_qty
                     }
         return res
@@ -361,8 +361,8 @@ class computed_purchase_order_line(Model):
                     'product_code_inv': psi.product_code,
                     'product_name_inv': psi.product_name,
                     'product_price_inv': (
-                        psi.pricelist_ids
-                        and psi.pricelist_ids[0].price or 0),
+                        psi.pricelist_ids and
+                        psi.pricelist_ids[0].price or 0),
                     'package_quantity_inv': psi.package_qty,
                     'uom_po_id': psi.product_uom.id,
                     'state': 'up_to_date',
