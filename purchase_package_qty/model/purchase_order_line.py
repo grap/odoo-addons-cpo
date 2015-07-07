@@ -70,11 +70,13 @@ class PurchaseOrderLine(Model):
         res = super(PurchaseOrderLine, self).create(
             cr, uid, vals, context=context)
         self._check_purchase_qty(cr, uid, [res], context=context)
+        return res
 
     def write(self, cr, uid, ids, vals, context=None):
         res = super(PurchaseOrderLine, self).write(
             cr, uid, ids, vals, context=context)
         self._check_purchase_qty(cr, uid, ids, context=context)
+        return res
 
     # Views section
     def onchange_product_id(
