@@ -23,14 +23,16 @@
 
 from math import ceil
 
+from openerp.osv.osv import except_osv
 from openerp.osv.orm import Model
 from openerp.tools.translate import _
 
 
-class purchase_order_line(Model):
+class PurchaseOrderLine(Model):
     _inherit = 'purchase.order.line'
 
     # Constraints section
+    # TODO: Rewrite me in _contraint, if the Orm V8 allows param in message.
     def _check_purchase_qty(self, cr, uid, ids, context=None):
         for pol in self.browse(cr, uid, ids, context=context):
             if pol.order_id.state not in ('draft', 'sent'):
@@ -50,24 +52,36 @@ class purchase_order_line(Model):
             if not indicative:
                 if (int(pol.product_qty / package_qty) !=
                         pol.product_qty / package_qty):
-                    return False
+                    raise except_osv(
+                        _("Package Error!"),
+                        _(
+                            """You have to buy a multiple of the package"""
+                            """ qty or change the package settings in the"""
+                            """ supplierinfo of the product for the"""
+                            """ following line:"""
+                            """ \n - Product: %s;"""
+                            """ \n - Quantity: %s;"""
+                            """ \n - Unit Price: %s;""" % (
+                                pol.product_id.name, pol.product_qty,
+                                pol.price_unit)))
         return True
 
-    _constraints = [
-        (
-            _check_purchase_qty,
-            """Error: You have to buy a multiple of the package qty or"""
-            """ change the package settings in the supplierinfo of the"""
-            """ product.""",
-            ['package_qty']),
-    ]
+    def create(self, cr, uid, vals, context=None):
+        res = super(PurchaseOrderLine, self).create(
+            cr, uid, vals, context=context)
+        self._check_purchase_qty(cr, uid, [res], context=context)
+
+    def write(self, cr, uid, ids, vals, context=None):
+        res = super(PurchaseOrderLine, self).write(
+            cr, uid, ids, vals, context=context)
+        self._check_purchase_qty(cr, uid, ids, context=context)
 
     # Views section
     def onchange_product_id(
             self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
             partner_id, date_order=False, fiscal_position_id=False,
             date_planned=False, name=False, price_unit=False, context=None):
-        res = super(purchase_order_line, self).onchange_product_id(
+        res = super(PurchaseOrderLine, self).onchange_product_id(
             cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id,
             date_order=date_order, fiscal_position_id=fiscal_position_id,
             date_planned=date_planned, name=name, price_unit=price_unit,
