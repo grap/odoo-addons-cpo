@@ -23,74 +23,58 @@
 
 import time
 import datetime
-from openerp.osv import fields
-from openerp.osv.orm import Model
+from openerp import models, fields, api
 
 
-class product_product(Model):
+class ProductProduct(models.Model):
     _inherit = "product.product"
 
-    # Private Function Section
-    def _min_date(self, cr, uid, product_id, context=None):
+    average_consumption = fields.Float(
+        compute='_average_consumption',
+        string='Average Consumption per day',
+        multi='average_consumption')
+    total_consumption = fields.Float(
+        compute='_average_consumption',
+        string='Total Consumption',
+        multi='average_consumption')
+    nb_days = fields.Float(
+        compute='_average_consumption',
+        string='Number of days for the calculation',
+        multi='average_consumption',
+        help="""The calculation will be done for the last 365 days or"""
+        """ since the first purchase or sale of the product if it's"""
+        """ more recent""")
+
+    @api.one
+    def _min_date(self):
         query = """SELECT to_char(min(date), 'YYYY-MM-DD') \
-                from stock_move where product_id = %s""" % (product_id)
-        cr.execute(query)
-        results = cr.fetchall()
+                from stock_move where product_id = %s""" % (self.id)
+        self.env.cr.execute(query)
+        results = self.env.cr.fetchall()
         return results and results[0] and results[0][0] \
             or time.strftime('%Y-%m-%d')
 
-    # Fields Function Section
-    def _average_consumption(self, cr, uid, ids, fields, arg, context=None):
-        result = {}
+    @api.one
+    def _average_consumption(self):
         first_date = time.strftime('%Y-%m-%d')
         begin_date = (
             datetime.datetime.today()
             - datetime.timedelta(days=365)).strftime('%Y-%m-%d')
 
-        if context is None:
-            context = {}
-        c = context.copy()
-        c.update({
+        ctx = dict(self.env.context)
+        ctx.update({
             'states': ('confirmed', 'waiting', 'assigned', 'done'),
             'what': ('out', ),
             'from_date': begin_date
         })
-        stock = self.get_product_available(cr, uid, ids, context=c)
-
-        for product in self.browse(cr, uid, ids, context=context):
-            first_date = max(
-                begin_date,
-                self._min_date(cr, uid, product.id, context=c)
-            )
-            nb_days = (
-                datetime.datetime.today()
-                - datetime.datetime.strptime(first_date, '%Y-%m-%d')
-            ).days
-            result[product.id] = {
-                'average_consumption': (
-                    nb_days
-                    and - stock[product.id] / nb_days
-                    or False),
-                'total_consumption': - stock[product.id] or False,
-                'nb_days': nb_days or False,
-            }
-        return result
-
-    # Columns Section
-    _columns = {
-        'average_consumption': fields.function(
-            _average_consumption, type='float',
-            string='Average Consumption per day',
-            multi='average_consumption'),
-        'total_consumption': fields.function(
-            _average_consumption, type='float',
-            string='Total Consumption',
-            multi='average_consumption'),
-        'nb_days': fields.function(
-            _average_consumption, type='float',
-            string='Number of days for the calculation',
-            multi='average_consumption',
-            help="""The calculation will be done for the last 365 days or"""
-            """ since the first purchase or sale of the product if it's"""
-            """ more recent"""),
-    }
+        stock = self.with_context(ctx)._product_available()
+        first_date = max(begin_date, self.with_context(ctx)._min_date())
+        nb_days = (
+            datetime.datetime.today()
+            - datetime.datetime.strptime(first_date, '%Y-%m-%d')
+        ).days
+        self.average_consumption = (
+            nb_days and - stock[self.id]['qty_available'] / nb_days or 0.0)
+        self.total_consumption = - stock[self.id]['qty_available'] or 0.0
+        self.nb_days = nb_days or 0.0
+        return True

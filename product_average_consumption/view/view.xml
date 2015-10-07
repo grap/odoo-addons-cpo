@@ -21,12 +21,12 @@
 
 <openerp>
     <data>
-        <record id="view_account_move_form" model="ir.ui.view">
+        <record id="product_normal_form_view" model="ir.ui.view">
             <field name="name">product.consumption.form</field>
             <field name="model">product.product</field>
-            <field name="inherit_id" ref="stock.view_normal_procurement_locations_form"/>
+            <field name="inherit_id" ref="product.product_normal_form_view"/>
             <field name="arch" type="xml">
-                <group string="Stock and Expected Variations" position="after">
+                <group name="procurement_uom" position="after">
                     <group name="Consumption" string="Consumption figures">
                         <field name="nb_days"/>
                         <field name="total_consumption"/>
