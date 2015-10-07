@@ -5,6 +5,8 @@
 #    Copyright (C) 2013-Today GRAP (http://www.grap.coop)
 #    @author Julien WESTE
 #    @author Sylvain LE GAL (https://twitter.com/legalsylvain)
+#    Copyright (C) 2015 FactorLibre
+#    @author Hugo Santos <hugo.santos@factorlibre.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -23,7 +25,7 @@
 
 {
     'name': 'Purchase - Package Quantity',
-    'version': '1.1',
+    'version': '1.2',
     'category': 'Purchase',
     'description': """
 Allow user to define the package of products the supplier sells

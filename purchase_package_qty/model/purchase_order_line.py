@@ -5,6 +5,8 @@
 #    Copyright (C) 2013-Today GRAP (http://www.grap.coop)
 #    @author Julien WESTE
 #    @author Sylvain LE GAL (https://twitter.com/legalsylvain)
+#    Copyright (C) 2015 FactorLibre
+#    @author Hugo Santos <hugo.santos@factorlibre.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -22,17 +24,16 @@
 ##############################################################################
 
 from math import ceil
-
-from openerp.osv.orm import Model
-from openerp.tools.translate import _
+from openerp import models, api, _
 
 
-class purchase_order_line(Model):
+class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
     # Constraints section
-    def _check_purchase_qty(self, cr, uid, ids, context=None):
-        for pol in self.browse(cr, uid, ids, context=context):
+    @api.multi
+    def _check_purchase_qty(self):
+        for pol in self:
             if pol.order_id.state not in ('draft', 'sent'):
                 continue
             if not pol.product_id:
@@ -63,18 +64,21 @@ class purchase_order_line(Model):
     ]
 
     # Views section
-    def onchange_product_id(
-            self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
-            partner_id, date_order=False, fiscal_position_id=False,
-            date_planned=False, name=False, price_unit=False, context=None):
-        res = super(purchase_order_line, self).onchange_product_id(
-            cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id,
+    @api.multi
+    def onchange_product_id(self, pricelist_id, product_id, qty, uom_id,
+                            partner_id, date_order=False,
+                            fiscal_position_id=False, date_planned=False,
+                            name=False, price_unit=False, state='draft'):
+        res = super(PurchaseOrderLine, self).onchange_product_id(
+            pricelist_id, product_id, qty, uom_id, partner_id,
             date_order=date_order, fiscal_position_id=fiscal_position_id,
-            date_planned=date_planned, name=name, price_unit=price_unit,
-            context=context)
+            date_planned=date_planned,
+            name=name, price_unit=price_unit, state=state)
+        if not qty and res['value'].get('product_qty'):
+            qty = res['value']['product_qty']
         if product_id:
-            product_obj = self.pool.get('product.product')
-            product = product_obj.browse(cr, uid, product_id, context=context)
+            product_obj = self.env['product.product']
+            product = product_obj.browse(product_id)
             for supplier in product.seller_ids:
                 if partner_id and (supplier.name.id == partner_id):
                     package_qty = supplier.package_qty
@@ -84,7 +88,7 @@ class purchase_order_line(Model):
                         res['warning'] = {
                             'title': _('Warning!'),
                             'message': _(
-                                """The selected supplier only sells"""
+                                """The selected supplier only sells """
                                 """this product by %s %s""") % (
                                 supplier.package_qty,
                                 supplier.product_uom.name)}

@@ -5,6 +5,8 @@
 #    Copyright (C) 2013-Today GRAP (http://www.grap.coop)
 #    @author Julien WESTE
 #    @author Sylvain LE GAL (https://twitter.com/legalsylvain)
+#    Copyright (C) 2015 FactorLibre
+#    @author Hugo Santos <hugo.santos@factorlibre.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -21,36 +23,29 @@
 #
 ##############################################################################
 
-from openerp.osv.orm import Model
-from openerp.osv import fields
-from openerp import SUPERUSER_ID
+from openerp import models, fields, api
 import openerp.addons.decimal_precision as dp
 
 
-class product_supplierinfo(Model):
+class ProductSupplierinfo(models.Model):
     _inherit = 'product.supplierinfo'
 
-    # Columns section
-    _columns = {
-        'package_qty': fields.float(
-            'Package Qty', required=True,
-            digits_compute=dp.get_precision('Product UoM'),
-            help="""The quantity of products in the supplier package."""
-            """ You will always have to buy a multiple of this quantity."""),
-        'indicative_package': fields.boolean(
-            'Indicative Package',
-            help="""If checked, the system will not force you to purchase"""
-            """a strict multiple of package quantity"""),
-    }
-
-    _defaults = {
-        'package_qty': lambda *a: 1,
-        'indicative_package': False,
-    }
+    package_qty = fields.Float(
+        'Package Qty', required=True,
+        digits_compute=dp.get_precision('Product UoM'),
+        help="""The quantity of products in the supplier package."""
+        """ You will always have to buy a multiple of this quantity.""",
+        default=1)
+    indicative_package = fields.Boolean(
+        'Indicative Package',
+        help="""If checked, the system will not force you to purchase """
+        """a strict multiple of package quantity""",
+        default=False)
 
     # Constraints section
-    def _check_package_qty(self, cr, uid, ids, context=None):
-        for psi in self.browse(cr, uid, ids, context=context):
+    @api.multi
+    def _check_package_qty(self):
+        for psi in self:
             if psi.package_qty == 0:
                 return False
         return True
@@ -61,11 +56,9 @@ class product_supplierinfo(Model):
     ]
 
     # Init section
-    def _init_package_qty(self, cr, uid, ids=None, context=None):
-        psi_ids = self.search(cr, SUPERUSER_ID, [], context=context)
-        for psi in self.browse(cr, SUPERUSER_ID, psi_ids, context=context):
+    @api.model
+    def _init_package_qty(self):
+        for psi in self.sudo().search([]):
             package_qty = max(psi.min_qty, 1)
-            self.write(
-                cr, SUPERUSER_ID, psi.id, {'package_qty': package_qty},
-                context=context)
-        return psi_ids
+            psi.sudo().write({'package_qty': package_qty})
+        return True
