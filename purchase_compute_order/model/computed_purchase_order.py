@@ -20,18 +20,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
-from math import ceil
-
-from openerp.osv import fields, osv
-from openerp.osv.orm import Model
-from openerp.tools.translate import _
-import openerp.addons.decimal_precision as dp
 import datetime
 import time
+from math import ceil
+from openerp import models, fields, api, _, exceptions
+import openerp.addons.decimal_precision as dp
 
 
-class computed_purchase_order(Model):
+class ComputedPurchaseOrder(models.Model):
     _description = 'Computed Purchase Order'
     _name = 'computed.purchase.order'
     _order = 'id desc'
@@ -39,29 +35,39 @@ class computed_purchase_order(Model):
     # Constant Values
     _DEFAULT_NAME = _('New')
 
-    _STATE = [
-        ('draft', 'Draft'),
-        ('done', 'Done'),
-        ('canceled', 'Canceled'),
-    ]
+    @api.model
+    def _get_state_selection(self):
+        return [
+            ('draft', 'Draft'),
+            ('done', 'Done'),
+            ('canceled', 'Canceled')
+        ]
 
-    _TARGET_TYPE = [
-        ('product_price_inv', '€'),
-        ('time', 'days'),
-        ('weight_net', 'kg'),
-    ]
+    @api.model
+    def _get_target_type_selection(self):
+        return [
+            ('product_price_inv', '€'),
+            ('time', 'days'),
+            ('weight_net', 'kg')
+        ]
+
+    @api.model
+    def _get_product_price_selection(self):
+        return [
+            ('product_price', 'Product price'),
+            ('last_purchase', 'Last purchase price'),
+            ('last_purchase_supplier', 'Last purchase of the supplier')
+        ]
 
     # Fields Function section
-    def _get_stock_line_ids(self, cr, uid, ids, name, arg, context=None):
-        res = {}
-        for id in ids:
-            res[id] = [x.id for x in self.browse(cr, uid, id).line_ids]
-        return res
+    @api.multi
+    def _get_stock_line_ids(self):
+        for computed_po in self:
+            self.stock_line_ids = [x.id for x in computed_po.line_ids]
 
-    def _get_computed_amount_duration(
-            self, cr, uid, ids, field_names, arg, context=None):
-        res = {}
-        for cpo in self.browse(cr, uid, ids, context=context):
+    @api.multi
+    def _get_computed_amount_duration(self):
+        for cpo in self:
             min_duration = 999
             amount = 0
             for line in cpo.line_ids:
@@ -70,116 +76,93 @@ class computed_purchase_order(Model):
                         / line.average_consumption
                     min_duration = min(duration, min_duration)
                 amount += line.purchase_qty * line.product_price_inv
-            res[cpo.id] = {
-                'computed_amount': amount,
-                'computed_duration': min_duration,
-            }
-        return res
+            cpo.computed_amount = amount
+            cpo.computed_duration = min_duration
 
-    def _get_products_updated(
-            self, cr, uid, ids, field_names, arg, context=None):
-        res = {}
-        for cpo in self.browse(cr, uid, ids, context=context):
+    @api.multi
+    def _get_products_updated(self):
+        for cpo in self:
             updated = False
             for line in cpo.line_ids:
                 if line.state == 'updated':
                     updated = True
                     break
-            res[cpo.id] = updated
-        return res
+            cpo.products_updated = updated
 
-    # Columns section
-    _columns = {
-        'name': fields.char(
-            'Computed Purchase Order Reference', size=64, required=True,
-            readonly=True,
-            help="""Unique number of the automated purchase order, computed"""
-            """ automatically when the computed purchase order is created."""),
-        'company_id': fields.many2one(
-            'res.company', 'Company', readonly=True, required=True,
-            help="""When you will validate this item, this will create a"""
-            """ purchase order for this company."""),
-        'active': fields.boolean(
-            'Active',
-            help="""By unchecking the active field, you may hide this item"""
-            """ without deleting it."""),
-        'state': fields.selection(
-            _STATE, 'State', required=True),
-        'incoming_date': fields.date(
-            'Wished Incoming Date',
-            help="Wished date for products delivery."),
-        'partner_id': fields.many2one(
-            'res.partner', 'Supplier', required=True,
-            domain=[('supplier', '=', True)],
-            help="Supplier of the purchase order."),
-        'line_ids': fields.one2many(
-            'computed.purchase.order.line', 'computed_purchase_order_id',
-            'Order Lines', help="Products to order."),
-        # this is to be able to display the line_ids on 2 tabs of the view
-        'stock_line_ids': fields.function(
-            _get_stock_line_ids, type='one2many',
-            relation='computed.purchase.order.line',
-            help="Products to order."),
-        'compute_pending_quantity': fields.boolean(
-            'Pending quantity taken in account'),
-        'compute_draft_quantity': fields.boolean(
-            'Draft quantity taken in account'),
-        'purchase_order_id': fields.many2one(
-            'purchase.order', 'Purchase Order', readonly=True),
-        'purchase_target': fields.integer('Purchase Target'),
-        'target_type': fields.selection(
-            _TARGET_TYPE, 'Target Type', required=True,
-            help="""This defines the amount of products you want to"""
-            """ purchase. \n"""
-            """The system will compute a purchase order based on the stock"""
-            """ you have and the average consumption of each product."""
-            """ * Target type '€': computed purchase order will cost at"""
-            """ least the amount specified\n"""
-            """ * Target type 'days': computed purchase order will last"""
-            """ at least the number of days specified (according to current"""
-            """ average consumption)\n"""
-            """ * Target type 'kg': computed purchase order will weight at"""
-            """ least the weight specified"""),
-        'computed_amount': fields.function(
-            _get_computed_amount_duration, type='float',
-            digits_compute=dp.get_precision('Product Price'),
-            string='Amount of the computed order',
-            multi='computed_amount_duration'),
-        'computed_duration': fields.function(
-            _get_computed_amount_duration, type='integer',
-            string='Minimum duration after order',
-            multi='computed_amount_duration'),
-        'products_updated': fields.function(
-            _get_products_updated, type='boolean',
-            string='Indicate if there were any products updated in the list'),
-        'created_date': fields.date(
-            'Create Date'),
-        'confirm_date': fields.date(
-            'Confirm Date'),
-        'growth_factor': fields.float('Growth Factor'),
-        'product_price': fields.selection(
-            [('product_price', 'Product price'),
-                ('last_purchase', 'Last purchase price'),
-                ('last_purchase_supplier', 'Last purchase of the supplier')],
-            'Product price based on'),
-    }
+    name = fields.Char(
+        'Computed Purchase Order Reference', size=64, required=True,
+        readonly=True,
+        help="""Unique number of the automated purchase order, computed"""
+        """ automatically when the computed purchase order is created.""",
+        default=_DEFAULT_NAME)
+    company_id = fields.Many2one(
+        'res.company', string='Company', readonly=True, required=True,
+        help="""When you will validate this item, this will create a"""
+        """ purchase order for this company.""",
+        default=(
+            lambda s: s.env['res.users']._get_company()))
+    active = fields.Boolean(
+        'Active',
+        help="""By unchecking the active field, you may hide this item"""
+        """ without deleting it.""",
+        default=True)
+    state = fields.Selection('_get_state_selection', 'State', required=True,
+                             default='draft')
+    incoming_date = fields.Date('Wished Incoming Date',
+                                help="Wished date for products delivery.")
+    partner_id = fields.Many2one(
+        'res.partner', string='Supplier', required=True,
+        domain=[('supplier', '=', True)],
+        help="Supplier of the purchase order.")
+    line_ids = fields.One2many(
+        'computed.purchase.order.line', 'computed_purchase_order_id',
+        string='Order Lines', help="Products to order.")
 
-    # Defaults section
-    _defaults = {
-        'name': _DEFAULT_NAME,
-        'company_id': (
-            lambda s, cr, uid, c: s.pool.get('res.users')._get_company(
-                cr, uid, context=c)),
-        'active': True,
-        'state': 'draft',
-        'compute_pending_quantity': True,
-        'compute_draft_quantity': True,
-        'target_type': 'product_price_inv',
-        'purchase_target': 0,
-        'created_date': lambda *a: time.strftime('%Y-%m-%d'),
-        'product_price': 'product_price',
-
-    }
+    # this is to be able to display the line_ids on 2 tabs of the view
+    # TODO: If not works add compute: compute='_get_stock_line_ids',
+    stock_line_ids = fields.One2many(
+        'computed.purchase.order.line', 'computed_purchase_order_id',
+        help="Products to order.")
+    compute_pending_quantity = fields.Boolean(
+        'Pending quantity taken in account', default=True)
+    compute_draft_quantity = fields.Boolean('Draft quantity taken in account',
+                                            default=True)
+    purchase_order_id = fields.Many2one(
+        'purchase.order', string='Purchase Order', readonly=True)
+    purchase_target = fields.Integer('Purchase Target', default=0)
+    target_type = fields.Selection(
+        '_get_target_type_selection', 'Target Type', required=True,
+        help="""This defines the amount of products you want to"""
+        """ purchase. \n"""
+        """The system will compute a purchase order based on the stock"""
+        """ you have and the average consumption of each product."""
+        """ * Target type '€': computed purchase order will cost at"""
+        """ least the amount specified\n"""
+        """ * Target type 'days': computed purchase order will last"""
+        """ at least the number of days specified (according to current"""
+        """ average consumption)\n"""
+        """ * Target type 'kg': computed purchase order will weight at"""
+        """ least the weight specified""", default='product_price_inv')
+    computed_amount = fields.Float(
+        string='Amount of the computed order',
+        digits_compute=dp.get_precision('Product Price'),
+        compute='_get_computed_amount_duration',
+        multi='computed_amount_duration')
+    computed_duration = fields.Integer(
+        string='Minimum duration after order',
+        compute='_get_computed_amount_duration',
+        multi='computed_amount_duration')
+    products_updated = fields.Boolean(
+        string='Indicate if there were any products updated in the list',
+        compute='_get_products_updated'
+    )
+    created_date = fields.Date('Create Date',
+                               default=lambda *a: time.strftime('%Y-%m-%d'))
+    confirm_date = fields.Date('Confirm Date')
+    growth_factor = fields.Float('Growth Factor')
+    product_price = fields.Selection(
+        '_get_product_price_selection',
+        'Product price based on', default='product_price')
 
     # View Section
     def onchange_partner_id(self, cr, uid, ids, partner_id, context=None):
@@ -201,27 +184,24 @@ class computed_purchase_order(Model):
         return {'value': vals}
 
     # Overload Section
-    def create(self, cr, uid, vals, context=None):
+    @api.model
+    def create(self, vals):
         if vals.get('name', self._DEFAULT_NAME) == self._DEFAULT_NAME:
-            vals['name'] = self.pool.get('ir.sequence').get(
-                cr, uid, 'computed.purchase.order') or '/'
-        order = super(computed_purchase_order, self).create(
-            cr, uid, vals, context=context)
-        return order
+            vals['name'] = self.env['ir.sequence'].get(
+                'computed.purchase.order') or '/'
+        return super(ComputedPurchaseOrder, self).create(vals)
 
-    def write(self, cr, uid, ids, values, context=None):
-        if context is None:
-            context = {}
-        cpo_id = super(computed_purchase_order, self).write(
-            cr, uid, ids, values, context=context)
-        if self.update_sorting(cr, uid, values, context=None):
-            self._sort_lines(cr, uid, ids, context=context)
+    @api.multi
+    def write(self, values):
+        cpo_id = super(ComputedPurchaseOrder, self).write(values)
+        if self.update_sorting(values):
+            self._sort_lines()
         return cpo_id
 
-    def update_sorting(self, cr, uid, values, context=None):
+    @api.model
+    def update_sorting(self, values):
         try:
-            if context is None:
-                context = {}
+            context = self.env.context
             line_ids = values.get('line_ids', False)
             if not line_ids:
                 return False
@@ -246,33 +226,28 @@ class computed_purchase_order(Model):
             return False
 
     # Private Section
-    def _sort_lines(self, cr, uid, ids, context=None):
-        cpol_obj = self.pool.get('computed.purchase.order.line')
-        if context is None:
-            context = {}
-        if not isinstance(ids, list):
-            ids = [ids]
-        for cpo in self.browse(cr, uid, ids, context=context):
-            lines = cpol_obj.read(
-                cr, uid, [x.id for x in cpo.line_ids],
-                ['stock_duration', 'average_consumption'], context=context)
+    @api.multi
+    def _sort_lines(self):
+        cpol_obj = self.env['computed.purchase.order.line']
+        for cpo in self:
+            lines = cpo.line_ids
             lines = sorted(
-                lines, key=lambda line: line['average_consumption'],
+                lines, key=lambda line: line.average_consumption,
                 reverse=True)
-            lines = sorted(lines, key=lambda line: line['stock_duration'])
+            lines = sorted(lines, key=lambda line: line.stock_duration)
 
             id_index_list = {}
             for i in lines:
                 id_index_list[i['id']] = lines.index(i)
             for line_id in id_index_list.keys():
-                cpol_obj.write(
-                    cr, uid, line_id, {'sequence': id_index_list[line_id]},
-                    context=context)
+                line = cpol_obj.browse(line_id)
+                line.write({'sequence': id_index_list[line_id]})
 
-    def _make_po_lines(self, cr, uid, id, context=None):
-        cpo = self.browse(cr, uid, id, context=context)
+    @api.multi
+    def _make_po_lines(self):
+        self.ensure_one()
         all_lines = []
-        for line in cpo.line_ids:
+        for line in self.line_ids:
             if line.purchase_qty != 0:
                 line_values = {
                     'name': "%s%s" % (
@@ -282,8 +257,7 @@ class computed_purchase_order(Model):
                             or line.product_id.name_template),
                     'product_qty': line.purchase_qty,
                     'date_planned': (
-                        cpo.incoming_date or fields.date.context_today(
-                            self, cr, uid, context=context)),
+                        self.incoming_date or fields.Date.context_today(self)),
                     'product_uom': line.product_id.uom_po_id.id,
                     'product_id': line.product_id.id,
                     'price_unit': line.product_price_inv,
@@ -294,19 +268,18 @@ class computed_purchase_order(Model):
                 all_lines.append((0, 0, line_values),)
         return all_lines
 
-    def _compute_purchase_quantities_days(self, cr, uid, id, context=None):
-        cpol_obj = self.pool.get('computed.purchase.order.line')
-        cpo = self.browse(cr, uid, id, context=context)
-        days = cpo.purchase_target
-        for line in cpo.line_ids:
-
+    @api.multi
+    def _compute_purchase_quantities_days(self):
+        self.ensure_one()
+        days = self.purchase_target
+        for line in self.line_ids:
             if line.average_consumption:
                 quantity = max(
                     days * line.average_consumption * line.uom_po_id.factor
                     / line.uom_id.factor - line.computed_qty, 0)
-
-                if cpo.growth_factor != 0:
-                    quantity_growth_factor = quantity * cpo.growth_factor / 100
+                if self.growth_factor != 0:
+                    quantity_growth_factor = (
+                        quantity * self.growth_factor / 100)
                     quantity = quantity + round(quantity_growth_factor)
 
                 if line.package_quantity and quantity % line.package_quantity:
@@ -314,22 +287,20 @@ class computed_purchase_order(Model):
                         * line.package_quantity
             else:
                 quantity = line.package_quantity or 0
-
-            cpol_obj.write(
-                cr, uid, line.id, {'purchase_qty': quantity}, context=context)
+            line.write({'purchase_qty': quantity})
         return True
 
-    def _compute_purchase_quantities_other(
-            self, cr, uid, id, field=None, context=None):
-        cpol_obj = self.pool.get('computed.purchase.order.line')
-        cpo = self.browse(cr, uid, id, context=context)
+    @api.multi
+    def _compute_purchase_quantities_other(self, field=None):
+        self.ensure_one()
+        cpol_obj = self.env['computed.purchase.order.line']
+        cpo = self
         if not cpo.line_ids:
             return False
         target = cpo.purchase_target
         ok = False
         days = -1
-        field_list = cpol_obj.read(
-            cr, uid, [x.id for x in cpo.line_ids], [field], context=context)
+        field_list = cpol_obj.read([x.id for x in cpo.line_ids], [field])
         field_list_dict = {}
         for i in field_list:
             field_list_dict[i['id']] = i[field]
@@ -352,17 +323,14 @@ class computed_purchase_order(Model):
                 qty_tmp[line.id] = quantity
 
             ok = self._check_purchase_qty(
-                cr, uid, target, field_list_dict, qty_tmp, context=context)
+                target, field_list_dict, qty_tmp)
 
         for line in cpo.line_ids:
-            cpol_obj.write(
-                cr, uid, line.id, {'purchase_qty': qty_tmp[line.id]},
-                context=context)
+            line.write({'purchase_qty': qty_tmp[line.id]})
         return True
 
-    def _check_purchase_qty(
-            self, cr, uid, target=0, field_list=None, qty_tmp=None,
-            context=None):
+    @api.model
+    def _check_purchase_qty(self, target=0, field_list=None, qty_tmp=None):
         if not target or field_list is None or qty_tmp is None:
             return True
         total = 0
@@ -371,25 +339,26 @@ class computed_purchase_order(Model):
         return total >= target
 
     # Action section
-    def compute_active_product_stock(self, cr, uid, ids, context=None):
-        cpol_obj = self.pool.get('computed.purchase.order.line')
-        psi_obj = self.pool.get('product.supplierinfo')
-        pp_obj = self.pool.get('product.product')
-        for cpo in self.browse(cr, uid, ids, context=context):
+    @api.multi
+    def compute_active_product_stock(self):
+        psi_obj = self.env['product.supplierinfo']
+        pp_obj = self.env['product.product']
+        for cpo in self:
             cpol_list = []
             # TMP delete all rows,
             # TODO : depends on further request to avoid user data to be lost
-            unlink_ids = [cpol.id for cpol in cpo.line_ids]
-            cpol_obj.unlink(cr, uid, unlink_ids, context=context)
+            cpo.mapped('line_ids').unlink()
 
             # Get product_product and compute stock
-            psi_ids = psi_obj.search(
-                cr, uid, [('name', '=', cpo.partner_id.id)], context=context)
-            for psi in psi_obj.browse(cr, uid, psi_ids, context=context):
-                pp_ids = pp_obj.search(cr, uid, [
-                    ('product_tmpl_id', '=', psi.product_id.id),
-                    ('state', 'not in', ('end', 'obsolete'))], context=context)
-                for pp in pp_obj.browse(cr, uid, pp_ids, context=context):
+            psi_ids = psi_obj.search([
+                ('name', '=', cpo.partner_id.id)
+            ])
+            for psi in psi_ids:
+                pp_ids = pp_obj.search([
+                    ('product_tmpl_id', '=', psi.product_tmpl_id.id),
+                    ('state', 'not in', ('end', 'obsolete'))
+                ])
+                for pp in pp_ids:
                     cpol_list.append((0, 0, {
                         'product_id': pp.id,
                         'state': 'up_to_date',
@@ -400,57 +369,48 @@ class computed_purchase_order(Model):
                         'uom_po_id': psi.product_uom.id,
                     }))
             # update line_ids
-            self.write(
-                cr, uid, cpo.id, {'line_ids': cpol_list}, context=context)
+            cpo.write({'line_ids': cpol_list})
         return True
 
-    def compute_purchase_quantities(self, cr, uid, id, context=None):
-        if isinstance(id, list):
-            id = id[0]
-        cpo = self.browse(cr, uid, id, context=context)
+    @api.multi
+    def compute_purchase_quantities(self):
+        self.ensure_one()
+        cpo = self
         if cpo.target_type == 'time':
-            res = self._compute_purchase_quantities_days(
-                cr, uid, id, context=context)
+            res = self._compute_purchase_quantities_days()
         else:
             res = self._compute_purchase_quantities_other(
-                cr, uid, id, field=cpo.target_type, context=context)
+                field=cpo.target_type)
         return res
 
-    def make_order(self, cr, uid, id, context=None):
-        if isinstance(id, list):
-            id = id[0]
-        po_lines = self._make_po_lines(cr, uid, id, context=context)
+    @api.multi
+    def make_order(self):
+        self.ensure_one
+        po_lines = self._make_po_lines()
         if not po_lines:
-            raise osv.except_osv(
-                _('Invalid Action!'),
+            raise exceptions.Warning(
                 _('All purchase quantities are set to 0!'))
 
-        cpo = self.browse(cr, uid, id, context=context)
-        po_obj = self.pool.get('purchase.order')
-        partner_obj = self.pool.get('res.partner')
-        partner = partner_obj.browse(
-            cr, uid, cpo.partner_id.id, context=context)
+        cpo = self
+        po_obj = self.env['purchase.order']
+        partner = cpo.partner_id
+        company = self.env.user.company_id
         po_values = {
             'origin': cpo.name,
             'partner_id': cpo.partner_id.id,
-            'location_id': (self.pool.get('res.users').browse(
-                cr, uid, uid, context=context).company_id.partner_id
-                .property_stock_customer.id),
+            'location_id': company.partner_id.property_stock_customer.id,
             'pricelist_id': partner.property_product_pricelist_purchase.id,
             'order_line': po_lines,
         }
-        po_id = po_obj.create(cr, uid, po_values, context=context)
-        self.write(
-            cr, uid, id, {
-                'state': 'done',
-                'purchase_order_id': po_id,
-                'confirm_date': datetime.datetime.now()
-            },
-            context=context)
+        po_id = po_obj.create(po_values)
+        self.write({
+            'state': 'done',
+            'purchase_order_id': po_id.id,
+            'confirm_date': datetime.datetime.now()
+        })
 
-        mod_obj = self.pool.get('ir.model.data')
-        res = mod_obj.get_object_reference(
-            cr, uid, 'purchase', 'purchase_order_form')
+        mod_obj = self.env['ir.model.data']
+        res = mod_obj.get_object_reference('purchase', 'purchase_order_form')
         res_id = res and res[1] or False
         return {
             'name': _('Purchase Order'),
@@ -461,5 +421,5 @@ class computed_purchase_order(Model):
             'type': 'ir.actions.act_window',
             'nodestroy': True,
             'target': 'current',
-            'res_id': po_id or False,
+            'res_id': po_id.id or False,
         }

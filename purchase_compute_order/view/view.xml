@@ -72,16 +72,16 @@
                         string="Computed purchase order lines" 
                         colors="brown:state == 'updated';blue:state == 'new'" 
                         editable="bottom">
-                                        <field name="product_id" on_change="onchange_product_id(parent.id, product_id, parent.partner_id)"/>
-                                        <field name="product_code_inv" on_change="onchange_product_info()"/>
-                                        <field name="product_name_inv" on_change="onchange_product_info()"/>
-                                        <field name="product_price_inv" on_change="onchange_product_info()"/>
+                                        <field name="product_id"/>
+                                        <field name="product_code_inv"/>
+                                        <field name="product_name_inv"/>
+                                        <field name="product_price_inv"/>
                                         <field name="computed_qty"/>
                                         <field name="manual_input_output_qty"/>
                                         <field name="average_consumption"/>
                                         <field name="uom_id"/>
                                         <field name="stock_duration"/>
-                                        <field name="package_quantity_inv" on_change="onchange_product_info()"/>
+                                        <field name="package_quantity_inv"/>
                                         <field name="purchase_qty"/>
                                         <field name="uom_po_id"/>
                                         <field name="state" />

@@ -21,27 +21,29 @@
 #
 ##############################################################################
 
-from openerp.osv.orm import Model
+from openerp import models, api
 
 
-class product_supplierinfo(Model):
+class ProductSupplierinfo(models.Model):
     _inherit = 'product.supplierinfo'
 
     # Constraints section
     _sql_constraints = [
         (
-            'psi_product_name_uniq', 'unique(name, product_id)',
+            'psi_product_name_uniq', 'unique(name, product_tmpl_id)',
             """You cannot register several times the same supplier on a"""
             """ product!"""),
     ]
 
     # Private section
-    def _delete_duplicates(self, cr, uid, ids=None, context=None):
+    @api.model
+    def _delete_duplicates(self):
+        cr = self.env.cr
         query = """
             SELECT pp.id
             FROM
                 product_supplierinfo psi
-                INNER JOIN product_template pt ON psi.product_id = pt.id
+                INNER JOIN product_template pt ON psi.product_tmpl_id = pt.id
                 INNER JOIN product_product pp ON pp.product_tmpl_id = pt.id
             GROUP BY
                 pp.id, psi.name
@@ -49,8 +51,7 @@ class product_supplierinfo(Model):
                 count(*) > 1"""
         cr.execute(query)
         product_ids = map(lambda x: x[0], cr.fetchall())
-        products = self.pool.get('product.product').browse(
-            cr, uid, product_ids, context=context)
+        products = self.env['product.product'].browse(product_ids)
 
         deleted_ids = []
         for product in products:

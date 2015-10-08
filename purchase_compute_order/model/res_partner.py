@@ -5,6 +5,8 @@
 #    Copyright (C) 2013-Today GRAP (http://www.grap.coop)
 #    @author Julien WESTE
 #    @author Sylvain LE GAL (https://twitter.com/legalsylvain)
+#    Copyright (C) 2015 FactorLibre
+#    @author Hugo Santos <hugo.santos@factorlibre.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -21,38 +23,32 @@
 #
 ##############################################################################
 
-from openerp.osv import fields
-from openerp.osv.orm import Model
+from openerp import models, fields, api
 
 
-class res_partner(Model):
+class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    # Constant Values
-    _TARGET_TYPE = [
-        ('product_price_inv', '€'),
-        ('time', 'days'),
-        ('weight_net', 'kg'),
-    ]
+    @api.model
+    def _get_target_type_selection(self):
+        return [
+            ('product_price_inv', '€'),
+            ('time', 'days'),
+            ('weight_net', 'kg'),
+        ]
 
-    # Columns Section
-    _columns = {
-        'purchase_target': fields.integer('Purchase Target'),
-        'target_type': fields.selection(
-            _TARGET_TYPE, 'Target Type', required=True,
-            help="""This defines the amount of products you want to"""
-            """ purchase. \n"""
-            """The system will compute a purchase order based on the stock"""
-            """ you have and the average consumption of each product."""
-            """* Target type '€': computed purchase order will cost"""
-            """ at least the amount specified\n"""
-            """* Target type 'days': computed purchase order will last at"""
-            """ least the number of days specified (according to current"""
-            """ average consumption)\n"""
-            """* Target type 'kg': computed purchase order will weight"""
-            """ at least the weight specified"""),
-    }
-
-    _defaults = {
-        'target_type': 'product_price_inv',
-    }
+    purchase_target = fields.Integer('Purchase Target')
+    target_type = fields.Selection(
+        selection='_get_target_type_selection', string='Target Type',
+        required=True,
+        help="This defines the amount of products you want to purchase. \n"
+        "The system will compute a purchase order based on the stock"
+        " you have and the average consumption of each product."
+        "* Target type '€': computed purchase order will cost"
+        " at least the amount specified\n"
+        "* Target type 'days': computed purchase order will last at"
+        " least the number of days specified (according to current"
+        " average consumption)\n"
+        "* Target type 'kg': computed purchase order will weight"
+        " at least the weight specified",
+        default='product_price_inv')

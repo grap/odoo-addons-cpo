@@ -5,6 +5,8 @@
 #    Copyright (C) 2013-Today GRAP (http://www.grap.coop)
 #    @author Julien WESTE
 #    @author Sylvain LE GAL (https://twitter.com/legalsylvain)
+#    Copyright (C) 2015 FactorLibre
+#    @author Hugo Santos <hugo.santos@factorlibre.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -23,7 +25,7 @@
 
 {
     'name': 'Computed Purchase Order',
-    'version': '2.2',
+    'version': '2.3',
     'category': 'Purchase',
     'description': """
 Provide tools to help purchaser during purchase process
@@ -93,7 +95,7 @@ Copyright, Author and Licence :
         'data/ir_sequence.xml',
         'security/ir_rule_data.yml',
         'security/ir_model_access_data.yml',
-        'view/update_product_wizard_view.xml',
+        'wizard/update_product_wizard_view.xml',
         'view/action.xml',
         'view/view.xml',
         'view/menu.xml',
