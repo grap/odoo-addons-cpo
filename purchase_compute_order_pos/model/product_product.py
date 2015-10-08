@@ -21,27 +21,25 @@
 #
 ##############################################################################
 
-from openerp.osv.orm import Model
+from openerp import models, api
 
 
-class product_product(Model):
+class ProductProduct(models.Model):
     _inherit = 'product.product'
 
     # Private section
-    def _get_draft_outgoing_qty(
-            self, cr, uid, ids, fields, arg, context=None):
-        res = super(product_product, self)._get_draft_outgoing_qty(
-            cr, uid, ids, fields, arg, context=context)
-        pol_obj = self.pool.get('pos.order.line')
-        pol_ids = pol_obj.search(cr, uid, [
+    @api.multi
+    def _get_draft_outgoing_qty(self):
+        super(ProductProduct, self)._get_draft_outgoing_qty()
+        pol_obj = self.env['pos.order.line']
+        pol_ids = pol_obj.search([
             ('state', '=', 'draft'),
-            ('product_id', 'in', ids)], context=context)
+            ('product_id', 'in', map(lambda p: p.id, self))
+        ])
         draft_qty = {}
 
-        for line in pol_obj.browse(cr, uid, pol_ids, context=context):
+        for line in pol_ids:
             draft_qty.setdefault(line.product_id.id, 0)
             draft_qty[line.product_id.id] -= line.qty
-        for pp in self.browse(cr, uid, ids, context=context):
-            res.setdefault(pp.id, 0)
-            res[pp.id] += draft_qty.get(pp.id, 0)
-        return res
+        for pp in self:
+            pp.draft_outgoing_qty += draft_qty.get(pp.id, 0)

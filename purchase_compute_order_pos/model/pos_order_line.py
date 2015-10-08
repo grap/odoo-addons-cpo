@@ -21,14 +21,10 @@
 #
 ##############################################################################
 
-from openerp.osv.orm import Model
-from openerp.osv import fields
+from openerp import models, fields
 
 
-class pos_order_line(Model):
+class PosOrderLine(models.Model):
     _inherit = 'pos.order.line'
 
-    _columns = {
-        'state': fields.related(
-            'order_id', 'state', type='char', string='State'),
-    }
+    state = fields.Char('State', related='order_id.state', readonly=True)
