@@ -33,7 +33,7 @@ class ProductProduct(models.Model):
         super(ProductProduct, self)._get_draft_outgoing_qty()
         pol_obj = self.env['pos.order.line']
         pol_ids = pol_obj.search([
-            ('state', '=', 'draft'),
+            ('order_id.state', '=', 'draft'),
             ('product_id', 'in', map(lambda p: p.id, self))
         ])
         draft_qty = {}
