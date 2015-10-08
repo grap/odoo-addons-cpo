@@ -165,23 +165,17 @@ class ComputedPurchaseOrder(models.Model):
         'Product price based on', default='product_price')
 
     # View Section
-    def onchange_partner_id(self, cr, uid, ids, partner_id, context=None):
+    @api.onchange('partner_id')
+    def onchange_partner_id(self):
         # TODO: create a wizard to validate the change
-        vals = {
-            'purchase_target': 0,
-            'target_type': 'product_price_inv',
-        }
-        if partner_id:
-            partner_obj = self.pool.get('res.partner')
-            partner = partner_obj.browse(cr, uid, partner_id, context=context)
-            vals = {
-                'purchase_target': partner.purchase_target,
-                'target_type': partner.target_type,
-            }
-        if ids:
-            cpo = self.browse(cr, uid, ids, context=context)[0]
-            vals['line_ids'] = map(lambda x: (2, x.id, False), cpo.line_ids)
-        return {'value': vals}
+        self.purchase_target = 0
+        self.target_type = 'product_price_inv'
+        if self.partner_id:
+            partner = self.partner_id
+            self.purchase_target = partner.purchase_target
+            self.target_type = partner.target_type
+        if self.line_ids:
+            self.line_ids = map(lambda x: (2, x.id, False), self.line_ids)
 
     # Overload Section
     @api.model
