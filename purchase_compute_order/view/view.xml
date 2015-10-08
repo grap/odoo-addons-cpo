@@ -17,53 +17,49 @@
                             <field name="state" widget="statusbar" statusbar_visible="draft,done,canceled" statusbar_colors='{"canceled":"red","done":"blue"}' readonly="1"/>
                     </header>
                     <sheet>
-                            <group colspan="8" col="2">
-                                <h1>
-                                    <label string="Computed Purchase Order" class="oe_title"/>
-                                    <field name="name" class="oe_inline" nolabel="1"/>
-                                </h1>
-                            </group>
-                        <group col="7">
-                            <group colspan="3" col="2">
-                                <field name="partner_id" on_change="onchange_partner_id(partner_id)"/>
+                        <h1>
+                            <label string="Computed Purchase Order"/>
+                            <field name="name" class="oe_inline" readonly="1" modifiers="{'readonly': true, 'required': true}"/>
+                        </h1>
+                        <group>
+                            <group string="Basic Info">
+                                <field name="partner_id"/>
                                 <field name="product_price" required="1"/>
                                 <field name="created_date" readonly="1"/>
+                                <field name="incoming_date"/>
                                 <field name="confirm_date" readonly="1"/>
+                                <field name="purchase_order_id" states="done"/>
+                                <field name="products_updated" invisible="1"/>
+                                <field name="company_id" groups="base.group_multi_company"/>
                             </group>
-                            <field name="incoming_date"/>
-                            <field name="purchase_order_id" states="done"/>
-                            <field name="products_updated" invisible="1"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
-                        </group>
-                        <group states="draft" col="8">
-                            <group string="Get Products" colspan="3">
+                            <group states="draft" string="Products To Include">
                                 <field name="compute_pending_quantity" />
                                 <field name="compute_draft_quantity" />
-                            </group>
-                            <group colspan="1">
-                                <button name="compute_active_product_stock" 
+                                <button name="compute_active_product_stock"
                                     type="object"
-                                    string="Get active products and compute stock" 
-                                    help="Fetch all active products sold by selected supplier and calculate the available quantities. It ignores inactive products and products in state 'obsolete' or 'end'" 
-                                    states="draft"/>
-                            </group>
-                            <group string="Compute Order" colspan="3" col="3">
-                                <field name="purchase_target"/>
-                                <field name="target_type" nolabel="1"/>
-                                <field name="growth_factor" />
-                            </group>
-                            <group colspan="1">
-                                <button name="compute_purchase_quantities" 
-                                    type="object"
-                                    string="Compute Purchase Quantities" 
-                                    help="Compute the optimal purchase quantities of selected products according to the objective." 
+                                    string="Get active products and compute stock"
+                                    help="Fetch all active products sold by selected supplier and calculate the available quantities. It ignores inactive products and products in state 'obsolete' or 'end'"
                                     states="draft"/>
                             </group>
                         </group>
-                        <group col="6">
-                            <label string="Result" class="oe_horizontal_separator" col="2"/>
-                            <field name="computed_amount"/>
-                            <field name="computed_duration"/>
+                        <group>
+                            <group states="draft" string="Compute Order">
+                                <label for="purchase_target"/>
+                                <div>
+                                    <field name="purchase_target" class="oe_inline"/>
+                                    <field name="target_type" class="oe_inline"/>
+                                </div>
+                                <field name="growth_factor"/>
+                                <button name="compute_purchase_quantities"
+                                    type="object"
+                                    string="Compute Purchase Quantities"
+                                    help="Compute the optimal purchase quantities of selected products according to the objective."
+                                    states="draft"/>
+                            </group>
+                            <group string="Result">
+                                <field name="computed_amount"/>
+                                <field name="computed_duration"/>
+                            </group>
                         </group>
                         <notebook colspan="4">
                             <page string="Order lines">
