@@ -24,6 +24,7 @@
 import time
 import datetime
 from openerp import models, fields, api
+from openerp.tools.float_utils import float_round
 
 
 class ProductProduct(models.Model):
@@ -31,16 +32,13 @@ class ProductProduct(models.Model):
 
     average_consumption = fields.Float(
         compute='_average_consumption',
-        string='Average Consumption per day',
-        multi='average_consumption')
+        string='Average Consumption per day')
     total_consumption = fields.Float(
         compute='_average_consumption',
-        string='Total Consumption',
-        multi='average_consumption')
+        string='Total Consumption')
     nb_days = fields.Float(
         compute='_average_consumption',
         string='Number of days for the calculation',
-        multi='average_consumption',
         help="""The calculation will be done for the last 365 days or"""
         """ since the first purchase or sale of the product if it's"""
         """ more recent""")
@@ -54,27 +52,41 @@ class ProductProduct(models.Model):
         return results and results[0] and results[0][0] \
             or time.strftime('%Y-%m-%d')
 
-    @api.one
+    @api.multi
     def _average_consumption(self):
+        self.refresh()
+        product_ids = map(lambda p: p.id, self)
         first_date = time.strftime('%Y-%m-%d')
         begin_date = (
             datetime.datetime.today()
             - datetime.timedelta(days=365)).strftime('%Y-%m-%d')
-
         ctx = dict(self.env.context)
         ctx.update({
-            'states': ('confirmed', 'waiting', 'assigned', 'done'),
-            'what': ('out', ),
             'from_date': begin_date
         })
-        stock = self.with_context(ctx)._product_available()
-        first_date = max(begin_date, self.with_context(ctx)._min_date())
-        nb_days = (
-            datetime.datetime.today()
-            - datetime.datetime.strptime(first_date, '%Y-%m-%d')
-        ).days
-        self.average_consumption = (
-            nb_days and - stock[self.id]['qty_available'] / nb_days or 0.0)
-        self.total_consumption = - stock[self.id]['qty_available'] or 0.0
-        self.nb_days = nb_days or 0.0
+        domain_products = [('product_id', 'in', product_ids)]
+        domain_move_out = []
+        domain_quant_loc, domain_move_in_loc, domain_move_out_loc = \
+            self._get_domain_locations()
+        domain_move_out += self.with_context(ctx)._get_domain_dates() \
+            + [('state', 'in', ('confirmed', 'waiting', 'assigned', 'done'))] \
+            + domain_products
+        domain_move_out += domain_move_out_loc
+        moves_out = self.env['stock.move'].read_group(
+            domain_move_out, ['product_id', 'product_qty'], ['product_id'])
+        moves_out = dict(map(lambda x: (x['product_id'][0], x['product_qty']),
+                             moves_out))
+        for product in self:
+            qty_out = float_round(
+                moves_out.get(product.id, 0.0),
+                precision_rounding=product.uom_id.rounding)
+            first_date = max(begin_date, product.with_context(ctx)._min_date())
+            nb_days = (
+                datetime.datetime.today()
+                - datetime.datetime.strptime(first_date, '%Y-%m-%d')
+            ).days
+            product.average_consumption = (
+                nb_days and - qty_out / nb_days or 0.0)
+            product.total_consumption = - qty_out or 0.0
+            product.nb_days = nb_days or 0.0
         return True
