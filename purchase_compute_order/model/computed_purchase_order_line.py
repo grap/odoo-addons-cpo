@@ -110,7 +110,7 @@ class ComputedPurchaseOrderLine(models.Model):
         'Draft Outgoing Quantity', related='product_id.draft_outgoing_qty',
         help="Draft sales", store=True)
     computed_qty = fields.Float(
-        'Stock', compute='_get_computed_qty',
+        string='Computed Stock', compute='_get_computed_qty',
         help="The sum of all quantities selected.",
         digits_compute=dp.get_precision('Product UoM'))
 

@@ -72,7 +72,7 @@
                                         <field name="product_code_inv"/>
                                         <field name="product_name_inv"/>
                                         <field name="product_price_inv"/>
-                                        <field name="computed_qty"/>
+                                        <field name="computed_qty" string="Computed Stock"/>
                                         <field name="manual_input_output_qty"/>
                                         <field name="average_consumption"/>
                                         <field name="uom_id"/>
@@ -98,7 +98,7 @@
                                         <field name="draft_incoming_qty"/>
                                         <field name="draft_outgoing_qty"/>
                                         <field name="manual_input_output_qty"/>
-                                        <field name="computed_qty"/>
+                                        <field name="computed_qty" string="Computed Stock"/>
                                     </tree>
                                 </field>
                             </page>
