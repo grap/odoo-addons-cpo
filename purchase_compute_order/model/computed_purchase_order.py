@@ -287,14 +287,13 @@ class ComputedPurchaseOrder(models.Model):
     @api.multi
     def _compute_purchase_quantities_other(self, field=None):
         self.ensure_one()
-        cpol_obj = self.env['computed.purchase.order.line']
         cpo = self
         if not cpo.line_ids:
             return False
         target = cpo.purchase_target
         ok = False
         days = -1
-        field_list = cpol_obj.read([x.id for x in cpo.line_ids], [field])
+        field_list = cpo.line_ids.read([field])
         field_list_dict = {}
         for i in field_list:
             field_list_dict[i['id']] = i[field]
@@ -308,8 +307,8 @@ class ComputedPurchaseOrder(models.Model):
                         days * line.average_consumption
                         * line.uom_po_id.factor / line.uom_id.factor
                         - line.computed_qty, 0)
-                    if line.package_quantity and\
-                            quantity % line.package_quantity:
+                    if line.package_quantity and \
+                            (quantity % line.package_quantity):
                         quantity = ceil(quantity / line.package_quantity)\
                             * line.package_quantity
                 else:
