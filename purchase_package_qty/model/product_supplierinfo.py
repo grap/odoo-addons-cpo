@@ -44,7 +44,7 @@ class product_supplierinfo(Model):
     }
 
     _defaults = {
-        'package_qty': lambda *a: 1,
+        'package_qty': 1,
         'indicative_package': False,
     }
 
