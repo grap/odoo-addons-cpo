@@ -30,11 +30,26 @@ import openerp.addons.decimal_precision as dp
 class product_supplierinfo(Model):
     _inherit = 'product.supplierinfo'
 
+    def fields_view_get(
+            self, cr, uid, view_id=None, view_type='form', context=None,
+            toolbar=False, submenu=False):
+        context = context and context or {}
+        res = super(product_supplierinfo, self).fields_view_get(
+            cr, uid, view_id=view_id, view_type=view_type, context=context,
+            toolbar=toolbar, submenu=False)
+        if view_type == 'form':
+            doc = etree.XML(res['arch'])
+            nodes = doc.xpath("//field[@name='package_qty']")
+            if nodes:
+                nodes[0].set('required', '1')
+                setup_modifiers(nodes[0], res['fields']['package_qty'])
+                res['arch'] = etree.tostring(doc)
+        return res
+
     # Columns section
     _columns = {
         'package_qty': fields.float(
-            'Package Qty', required=True,
-            digits_compute=dp.get_precision('Product UoM'),
+            'Package Qty', digits_compute=dp.get_precision('Product UoM'),
             help="""The quantity of products in the supplier package."""
             """ You will always have to buy a multiple of this quantity."""),
         'indicative_package': fields.boolean(
