@@ -21,9 +21,12 @@
 #
 ##############################################################################
 
+from lxml import etree
+
+from openerp import SUPERUSER_ID
 from openerp.osv.orm import Model
 from openerp.osv import fields
-from openerp import SUPERUSER_ID
+from openerp.osv.orm import setup_modifiers
 import openerp.addons.decimal_precision as dp
 
 
