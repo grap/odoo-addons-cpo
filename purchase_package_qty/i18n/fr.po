@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 7.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-07-07 12:41+0000\n"
-"PO-Revision-Date: 2015-07-07 12:41+0000\n"
+"POT-Creation-Date: 2015-12-02 23:01+0000\n"
+"PO-Revision-Date: 2015-12-02 23:01+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -41,7 +41,7 @@ msgstr "Information sur le fournisseur du produit"
 #: code:addons/purchase_package_qty/model/purchase_order_line.py:56
 #, python-format
 msgid "Package Error!"
-msgstr "Package Error!"
+msgstr "Erreur de condtionnement !"
 
 #. module: purchase_package_qty
 #: field:product.supplierinfo,package_qty:0
@@ -61,13 +61,13 @@ msgid "The quantity of products in the supplier package. You will always have to
 msgstr "La quantité de produit conditionnée par le fournisseur. Vous devez toujours acheter un multiple de cette quantité."
 
 #. module: purchase_package_qty
-#: code:addons/purchase_package_qty/model/purchase_order_line.py:100
+#: code:addons/purchase_package_qty/model/purchase_order_line.py:102
 #, python-format
 msgid "The selected supplier only sellsthis product by %s %s"
 msgstr "Le fournisseur vend seulement le produit par %s %s"
 
 #. module: purchase_package_qty
-#: code:addons/purchase_package_qty/model/purchase_order_line.py:99
+#: code:addons/purchase_package_qty/model/purchase_order_line.py:101
 #, python-format
 msgid "Warning!"
 msgstr "Avertissement!"
@@ -83,3 +83,4 @@ msgstr "Vous devez acheter un multiple du conditionnement ou changer le paramét
 " - Produit : %s; \n"
 " - Quantité : %s; \n"
 " - Prix unitaire : %s;"
+
