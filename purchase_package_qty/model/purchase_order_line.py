@@ -55,15 +55,16 @@ class PurchaseOrderLine(Model):
                     raise except_osv(
                         _("Package Error!"),
                         _(
-                            """You have to buy a multiple of the package"""
-                            """ qty or change the package settings in the"""
-                            """ supplierinfo of the product for the"""
-                            """ following line:"""
-                            """ \n - Product: %s;"""
-                            """ \n - Quantity: %s;"""
-                            """ \n - Unit Price: %s;""" % (
-                                pol.product_id.name, pol.product_qty,
-                                pol.price_unit)))
+                            "You have to buy a multiple of the package"
+                            " qty or change the package settings in the"
+                            " supplierinfo of the product for the"
+                            " following line:"
+                            " \n - Product: %s;"
+                            " \n - Unit Price: %s;"
+                            " \n - Purchase Quantity: %s;"
+                            " \n - Package Quantity: %s" % (
+                                pol.product_id.name, pol.price_unit,
+                                pol.product_qty, package_qty)))
         return True
 
     def create(self, cr, uid, vals, context=None):
