@@ -126,10 +126,10 @@ class ComputedPurchaseOrderLine(models.Model):
         for cpol in self:
             computed_qty = 0
             if cpol.computed_purchase_order_id.compute_pending_quantity:
-                computed_qty += (cpol.incoming_qty + cpol.outgoing_qty)
+                computed_qty += (cpol.incoming_qty - cpol.outgoing_qty)
             if cpol.computed_purchase_order_id.compute_draft_quantity:
-                computed_qty += (cpol.draft_incoming_qty
-                                 + cpol.draft_outgoing_qty)
+                computed_qty += (cpol.draft_incoming_qty -
+                                 cpol.draft_outgoing_qty)
             cpol.computed_qty = computed_qty
 
     @api.multi
@@ -150,9 +150,9 @@ class ComputedPurchaseOrderLine(models.Model):
                 ])
                 if psi:
                     unit_price = (
-                        psi.pricelist_ids
-                        and psi.pricelist_ids[0].price
-                        or psi.product_tmpl_id.standard_price)
+                        psi.pricelist_ids and
+                        psi.pricelist_ids[0].price or
+                        psi.product_tmpl_id.standard_price)
 
             if cpo_product_price == 'last_purchase':
                 purch_line_price = pool_purchase_line.search([
@@ -294,8 +294,7 @@ class ComputedPurchaseOrderLine(models.Model):
                     self.product_code_inv = psi.product_code
                     self.product_name_inv = psi.product_name
                     self.product_price_inv = (
-                        psi.pricelist_ids
-                        and psi.pricelist_ids[0].price or 0)
+                        psi.pricelist_ids and psi.pricelist_ids[0].price or 0)
                     self.package_quantity_inv = psi.package_qty
                     self.uom_po_id = psi.product_uom.id
                     self.state = 'up_to_date'

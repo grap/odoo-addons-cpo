@@ -20,7 +20,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
 from openerp import models, api
 
 
@@ -37,15 +36,14 @@ class ProductProduct(models.Model):
             ('product_id', 'in', map(lambda p: p.id, self))
         ])
         draft_qty = {}
-
         for line in sol_ids:
             draft_qty.setdefault(line.product_id.id, 0)
             if line.product_uos:
-                draft_qty[line.product_id.id] -= \
+                draft_qty[line.product_id.id] += \
                     line.product_uos_qty / line.product_uos.factor\
                     * line.product_id.uom_id.factor
             else:
-                draft_qty[line.product_id.id] -= \
+                draft_qty[line.product_id.id] += \
                     line.product_uom_qty / line.product_uom.factor\
                     * line.product_id.uom_id.factor
         for pp in self:

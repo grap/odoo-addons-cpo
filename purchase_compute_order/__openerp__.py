@@ -25,7 +25,7 @@
 
 {
     'name': 'Computed Purchase Order',
-    'version': '2.3',
+    'version': '8.0.2.4',
     'category': 'Purchase',
     'description': """
 Provide tools to help purchaser during purchase process
@@ -87,6 +87,7 @@ Copyright, Author and Licence :
     'depends': [
         'base',
         'product_average_consumption',
+        'product',
         'purchase',
         'purchase_package_qty',
     ],

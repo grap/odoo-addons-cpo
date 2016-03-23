@@ -59,11 +59,11 @@ class ComputedPurchaseOrder(models.Model):
             ('last_purchase_supplier', 'Last purchase of the supplier')
         ]
 
-    # Fields Function section
-    @api.multi
-    def _get_stock_line_ids(self):
-        for computed_po in self:
-            self.stock_line_ids = [x.id for x in computed_po.line_ids]
+    # # Fields Function section
+    # @api.multi
+    # def _get_stock_line_ids(self):
+    #     for computed_po in self:
+    #         self.stock_line_ids = [x.id for x in computed_po.line_ids]
 
     @api.multi
     def _get_computed_amount_duration(self):
