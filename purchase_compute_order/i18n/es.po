@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-13 10:48+0000\n"
-"PO-Revision-Date: 2015-10-13 12:49+0100\n"
+"POT-Creation-Date: 2016-04-12 09:18+0000\n"
+"PO-Revision-Date: 2016-04-12 11:21+0100\n"
 "Last-Translator: Hugo Santos <hugo.santos@factorlibre.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -43,10 +43,15 @@ msgid "Active"
 msgstr "Activo"
 
 #. module: purchase_compute_order
-#: code:addons/purchase_compute_order/model/computed_purchase_order.py:386
+#: code:addons/purchase_compute_order/model/computed_purchase_order.py:392
 #, python-format
 msgid "All purchase quantities are set to 0!"
 msgstr "Todas las cantidades a comprar se han establecido a 0"
+
+#. module: purchase_compute_order
+#: field:computed.purchase.order,computed_amount:0
+msgid "Amount of the computed order"
+msgstr "Importe del pedido calculado"
 
 #. module: purchase_compute_order
 #: view:update.products.wizard:purchase_compute_order.view_update_products_form
@@ -134,6 +139,7 @@ msgstr "Referencia pedido de compra calculado"
 
 #. module: purchase_compute_order
 #: view:computed.purchase.order:purchase_compute_order.view_computed_purchase_order_form
+#: field:computed.purchase.order.line,computed_qty:0
 msgid "Computed Stock"
 msgstr "Stock Calculado"
 
@@ -175,14 +181,37 @@ msgid "Created on"
 msgstr "Fecha de creación"
 
 #. module: purchase_compute_order
+#: help:computed.purchase.order.line,uom_id:0
+msgid "Default Unit of Measure used for all stock operation."
+msgstr "Default Unit of Measure used for all stock operation."
+
+#. module: purchase_compute_order
+#: field:computed.purchase.order,display_name:0
+#: field:computed.purchase.order.line,display_name:0
+#: field:update.products.line.wizard,display_name:0
+#: field:update.products.wizard,display_name:0
+msgid "Display Name"
+msgstr "Display Name"
+
+#. module: purchase_compute_order
 #: view:computed.purchase.order:purchase_compute_order.view_computed_purchase_order_search
 msgid "Draft"
 msgstr "Borrador"
 
 #. module: purchase_compute_order
+#: field:product.product,draft_incoming_qty:0
+msgid "Draft Incoming"
+msgstr "Borrador entrante"
+
+#. module: purchase_compute_order
 #: field:computed.purchase.order.line,draft_incoming_qty:0
 msgid "Draft Incoming Quantity"
 msgstr "Cantidad borrador entrante"
+
+#. module: purchase_compute_order
+#: field:product.product,draft_outgoing_qty:0
+msgid "Draft Outgoing"
+msgstr "Borrador saliente"
 
 #. module: purchase_compute_order
 #: field:computed.purchase.order.line,draft_outgoing_qty:0
@@ -269,6 +298,11 @@ msgid "Incoming Quantity"
 msgstr "Cantidad de entrada"
 
 #. module: purchase_compute_order
+#: field:computed.purchase.order,products_updated:0
+msgid "Indicate if there were any products updated in the list"
+msgstr "Indicate if there were any products updated in the list"
+
+#. module: purchase_compute_order
 #: model:ir.model,name:purchase_compute_order.model_product_supplierinfo
 msgid "Information about a product supplier"
 msgstr "Información de un proveedor de producto"
@@ -277,6 +311,14 @@ msgstr "Información de un proveedor de producto"
 #: model:ir.model,name:purchase_compute_order.model_update_products_line_wizard
 msgid "Information about products to update"
 msgstr "Informaciónsobre los productos a actualizar"
+
+#. module: purchase_compute_order
+#: field:computed.purchase.order,__last_update:0
+#: field:computed.purchase.order.line,__last_update:0
+#: field:update.products.line.wizard,__last_update:0
+#: field:update.products.wizard,__last_update:0
+msgid "Last Modified on"
+msgstr "Last Modified on"
 
 #. module: purchase_compute_order
 #: field:computed.purchase.order,write_uid:0
@@ -310,10 +352,25 @@ msgid "Manual variation"
 msgstr "Variación manual"
 
 #. module: purchase_compute_order
+#: field:computed.purchase.order,computed_duration:0
+msgid "Minimum duration after order"
+msgstr "Duración mínima después del pedido"
+
+#. module: purchase_compute_order
+#: field:computed.purchase.order.line,weight_net:0
+msgid "Net Weight"
+msgstr "Peso neto"
+
+#. module: purchase_compute_order
 #: code:addons/purchase_compute_order/model/computed_purchase_order.py:36
 #, python-format
 msgid "New"
 msgstr "Nuevo"
+
+#. module: purchase_compute_order
+#: help:computed.purchase.order.line,stock_duration:0
+msgid "Number of days the stock should last."
+msgstr "Número de días que debe durar el stock."
 
 #. module: purchase_compute_order
 #: field:computed.purchase.order,line_ids:0
@@ -342,6 +399,7 @@ msgstr "Unidades de embalaje"
 
 #. module: purchase_compute_order
 #: field:computed.purchase.order.line,package_quantity:0
+#: field:computed.purchase.order.line,package_quantity_inv:0
 msgid "Package quantity"
 msgstr "Unidades de embalaje"
 
@@ -399,7 +457,7 @@ msgid "Provider"
 msgstr "Proveedor"
 
 #. module: purchase_compute_order
-#: code:addons/purchase_compute_order/model/computed_purchase_order.py:410
+#: code:addons/purchase_compute_order/model/computed_purchase_order.py:416
 #: field:computed.purchase.order,purchase_order_id:0
 #, python-format
 msgid "Purchase Order"
@@ -410,6 +468,11 @@ msgstr "Pedido de compra"
 #: field:res.partner,purchase_target:0
 msgid "Purchase Target"
 msgstr "Objetivo de compra"
+
+#. module: purchase_compute_order
+#: field:computed.purchase.order.line,qty_available:0
+msgid "Quantity On Hand"
+msgstr "Cantidad a mano"
 
 #. module: purchase_compute_order
 #: field:computed.purchase.order.line,purchase_qty:0
@@ -444,6 +507,11 @@ msgid "State"
 msgstr "Estado"
 
 #. module: purchase_compute_order
+#: field:computed.purchase.order.line,stock_duration:0
+msgid "Stock Duration (Days)"
+msgstr "Duración de stock (Días)"
+
+#. module: purchase_compute_order
 #: view:computed.purchase.order:purchase_compute_order.view_computed_purchase_order_form
 msgid "Stock details"
 msgstr "Detalles Stock"
@@ -460,18 +528,21 @@ msgstr "Proveedor"
 
 #. module: purchase_compute_order
 #: field:computed.purchase.order.line,product_code:0
+#: field:computed.purchase.order.line,product_code_inv:0
 #: field:update.products.line.wizard,product_code:0
 msgid "Supplier Product Code"
 msgstr "Referecia producto de proveedor"
 
 #. module: purchase_compute_order
 #: field:computed.purchase.order.line,product_name:0
+#: field:computed.purchase.order.line,product_name_inv:0
 #: field:update.products.line.wizard,product_name:0
 msgid "Supplier Product Name"
 msgstr "Nombre producto de proveedor"
 
 #. module: purchase_compute_order
 #: field:computed.purchase.order.line,product_price:0
+#: field:computed.purchase.order.line,product_price_inv:0
 msgid "Supplier Product Price"
 msgstr "Precio producto de proveedor"
 
@@ -491,6 +562,11 @@ msgid "Target Type"
 msgstr "Tipo objetivo"
 
 #. module: purchase_compute_order
+#: help:computed.purchase.order.line,qty_available:0
+msgid "The available quantity on hand for this product"
+msgstr "La cantidad a mano disponible para este producto"
+
+#. module: purchase_compute_order
 #: help:update.products.line.wizard,package_qty:0
 msgid ""
 "The minimal quantity to purchase to this supplier, expressed in the supplier "
@@ -502,9 +578,19 @@ msgstr ""
 "predeterminada del producto lo contrario."
 
 #. module: purchase_compute_order
+#: help:computed.purchase.order.line,weight_net:0
+msgid "The net weight in Kg."
+msgstr "El peso neto en kg."
+
+#. module: purchase_compute_order
 #: help:computed.purchase.order.line,purchase_qty:0
 msgid "The quantity you should purchase."
 msgstr "Cantidad que debe ser comprada."
+
+#. module: purchase_compute_order
+#: help:computed.purchase.order.line,computed_qty:0
+msgid "The sum of all quantities selected."
+msgstr "La suma de todas las cantidades seleccionadas."
 
 #. module: purchase_compute_order
 #: help:update.products.line.wizard,product_uom:0
@@ -570,6 +656,7 @@ msgid "This product is already in the list!"
 msgstr "Este producto ya se encuentra en la lista"
 
 #. module: purchase_compute_order
+#: help:computed.purchase.order.line,product_code_inv:0
 #: help:update.products.line.wizard,product_code:0
 msgid ""
 "This supplier's product code will be used when printing a request for "
@@ -579,6 +666,7 @@ msgstr ""
 "vacío para usar la interna."
 
 #. module: purchase_compute_order
+#: help:computed.purchase.order.line,product_name_inv:0
 #: help:update.products.line.wizard,product_name:0
 msgid ""
 "This supplier's product name will be used when printing a request for "
@@ -586,6 +674,18 @@ msgid ""
 msgstr ""
 "Nombre de producto de este proveedor se utilizará al imprimir una solicitud. "
 "Mantenga vacío para usar la interna."
+
+#. module: purchase_compute_order
+#: code:addons/purchase_compute_order/model/computed_purchase_order.py:333
+#, python-format
+msgid ""
+"Total returned while computing purchase target is 0. The purchase target is set to "
+"%s and is not possible to reach the defined target. Please check lines if "
+"they have price/weight defined"
+msgstr ""
+"El total obtenido mientras se calculaba el objetivo de compra es 0. El objetivo de compra está establecido a "
+"%s y no es posible llegar al objetivo. Por favor, compruebe las líneas "
+"si tienen peso y precio definido"
 
 #. module: purchase_compute_order
 #: help:computed.purchase.order,name:0
@@ -602,6 +702,7 @@ msgid "Unit Price"
 msgstr "Precio unidad"
 
 #. module: purchase_compute_order
+#: field:computed.purchase.order.line,uom_id:0
 #: field:computed.purchase.order.line,uom_po_id:0
 msgid "UoM"
 msgstr "UdM"

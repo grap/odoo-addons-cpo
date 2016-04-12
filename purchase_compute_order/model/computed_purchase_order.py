@@ -329,6 +329,13 @@ class ComputedPurchaseOrder(models.Model):
         total = 0
         for key in field_list.keys():
             total += field_list[key] * qty_tmp[key]
+        if total == 0.0 and total < target:
+            raise exceptions.Warning(_(
+                'Total returned while computing purchase target is 0. '
+                'The purchase target is set to %s and is not possible to '
+                'reach the defined target. '
+                'Please check lines if they have price/weight defined') % (
+                    target))
         return total >= target
 
     # Action section
