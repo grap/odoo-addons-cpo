@@ -338,6 +338,15 @@ class ComputedPurchaseOrder(models.Model):
                     target))
         return total >= target
 
+    @api.multi
+    def _active_product_stock_product_domain(self, template_id):
+        self.ensure_one()
+        product_domain = [
+            ('product_tmpl_id', '=', template_id),
+            ('state', 'not in', ('end', 'obsolete'))
+        ]
+        return product_domain
+
     # Action section
     @api.multi
     def compute_active_product_stock(self):
@@ -354,10 +363,9 @@ class ComputedPurchaseOrder(models.Model):
                 ('name', '=', cpo.partner_id.id)
             ])
             for psi in psi_ids:
-                pp_ids = pp_obj.search([
-                    ('product_tmpl_id', '=', psi.product_tmpl_id.id),
-                    ('state', 'not in', ('end', 'obsolete'))
-                ])
+                product_domain = self._active_product_stock_product_domain(
+                    psi.product_tmpl_id.id)
+                pp_ids = pp_obj.search(product_domain)
                 for pp in pp_ids:
                     cpol_list.append((0, 0, {
                         'product_id': pp.id,
