@@ -124,7 +124,7 @@ class ComputedPurchaseOrderLine(models.Model):
     @api.multi
     def _get_computed_qty(self):
         for cpol in self:
-            computed_qty = 0
+            computed_qty = cpol.qty_available
             if cpol.computed_purchase_order_id.compute_pending_quantity:
                 computed_qty += (cpol.incoming_qty - cpol.outgoing_qty)
             if cpol.computed_purchase_order_id.compute_draft_quantity:
