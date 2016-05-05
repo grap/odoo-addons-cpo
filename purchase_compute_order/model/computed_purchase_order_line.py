@@ -95,7 +95,7 @@ class ComputedPurchaseOrderLine(models.Model):
         """- negative quantity : extra output ; \n"""
         """- positive quantity : extra input.""", default=0)
     qty_available = fields.Float(
-        'Quantity On Hand', related='product_id.qty_available',
+        'Quantity On Hand', compute='_product_qty_available',
         help="The available quantity on hand for this product")
     incoming_qty = fields.Float(
         'Incoming Quantity', related='product_id.incoming_qty',
@@ -120,6 +120,14 @@ class ComputedPurchaseOrderLine(models.Model):
             'product_id_uniq', 'unique(computed_purchase_order_id,product_id)',
             'Product must be unique by computed purchase order!'),
     ]
+
+    @api.multi
+    def _product_qty_available(self):
+        for cpol in self:
+            if cpol.product_id.id:
+                product_qty = cpol.product_id._product_available()[
+                    cpol.product_id.id]
+                cpol.qty_available = product_qty['qty_available']
 
     @api.multi
     def _get_computed_qty(self):
