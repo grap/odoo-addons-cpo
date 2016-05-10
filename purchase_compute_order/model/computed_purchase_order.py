@@ -280,7 +280,7 @@ class ComputedPurchaseOrder(models.Model):
                     quantity = ceil(quantity / line.package_quantity)\
                         * line.package_quantity
             else:
-                quantity = line.package_quantity or 0
+                quantity = 0
             line.write({'purchase_qty': quantity})
         return True
 
