@@ -404,6 +404,23 @@ class ComputedPurchaseOrder(models.Model):
         }
 
     @api.multi
+    def _open_purchase_order_action(self, purchase_id):
+        mod_obj = self.env['ir.model.data']
+        res = mod_obj.get_object_reference('purchase', 'purchase_order_form')
+        res_id = res and res[1] or False
+        return {
+            'name': _('Purchase Order'),
+            'view_type': 'form',
+            'view_mode': 'form',
+            'view_id': [res_id],
+            'res_model': 'purchase.order',
+            'type': 'ir.actions.act_window',
+            'nodestroy': True,
+            'target': 'current',
+            'res_id': purchase_id or False,
+        }
+
+    @api.multi
     def make_order(self):
         self.ensure_one
         po_lines = self._make_po_lines()
@@ -420,17 +437,4 @@ class ComputedPurchaseOrder(models.Model):
             'confirm_date': datetime.datetime.now()
         })
 
-        mod_obj = self.env['ir.model.data']
-        res = mod_obj.get_object_reference('purchase', 'purchase_order_form')
-        res_id = res and res[1] or False
-        return {
-            'name': _('Purchase Order'),
-            'view_type': 'form',
-            'view_mode': 'form',
-            'view_id': [res_id],
-            'res_model': 'purchase.order',
-            'type': 'ir.actions.act_window',
-            'nodestroy': True,
-            'target': 'current',
-            'res_id': po_id.id or False,
-        }
+        return self._open_purchase_order_action(po_id.id)
