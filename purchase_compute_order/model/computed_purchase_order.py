@@ -391,8 +391,9 @@ class ComputedPurchaseOrder(models.Model):
                 field=cpo.target_type)
         return res
 
-    @api.one
+    @api.multi
     def _get_purchase_order_vals(self, po_lines):
+        self.ensure_one
         company = self.env.user.company_id
         partner = self.partner_id
         return {
