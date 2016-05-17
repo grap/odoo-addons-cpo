@@ -391,6 +391,18 @@ class ComputedPurchaseOrder(models.Model):
                 field=cpo.target_type)
         return res
 
+    @api.one
+    def _get_purchase_order_vals(self, po_lines):
+        company = self.env.user.company_id
+        partner = self.partner_id
+        return {
+            'origin': self.name,
+            'partner_id': partner.id,
+            'location_id': company.partner_id.property_stock_customer.id,
+            'pricelist_id': partner.property_product_pricelist_purchase.id,
+            'order_line': po_lines,
+        }
+
     @api.multi
     def make_order(self):
         self.ensure_one
@@ -399,17 +411,8 @@ class ComputedPurchaseOrder(models.Model):
             raise exceptions.Warning(
                 _('All purchase quantities are set to 0!'))
 
-        cpo = self
         po_obj = self.env['purchase.order']
-        partner = cpo.partner_id
-        company = self.env.user.company_id
-        po_values = {
-            'origin': cpo.name,
-            'partner_id': cpo.partner_id.id,
-            'location_id': company.partner_id.property_stock_customer.id,
-            'pricelist_id': partner.property_product_pricelist_purchase.id,
-            'order_line': po_lines,
-        }
+        po_values = self._get_purchase_order_vals(po_lines)
         po_id = po_obj.create(po_values)
         self.write({
             'state': 'done',
