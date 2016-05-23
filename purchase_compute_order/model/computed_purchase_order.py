@@ -347,10 +347,17 @@ class ComputedPurchaseOrder(models.Model):
         ]
         return product_domain
 
+    @api.multi
+    def _get_product_supplierinfo(self):
+        self.ensure_one()
+        psi_obj = self.env['product.supplierinfo']
+        return psi_obj.search([
+            ('name', '=', self.partner_id.id)
+        ])
+
     # Action section
     @api.multi
     def compute_active_product_stock(self):
-        psi_obj = self.env['product.supplierinfo']
         pp_obj = self.env['product.product']
         for cpo in self:
             cpol_list = []
@@ -359,9 +366,7 @@ class ComputedPurchaseOrder(models.Model):
             cpo.mapped('line_ids').unlink()
 
             # Get product_product and compute stock
-            psi_ids = psi_obj.search([
-                ('name', '=', cpo.partner_id.id)
-            ])
+            psi_ids = cpo._get_product_supplierinfo()
             for psi in psi_ids:
                 product_domain = self._active_product_stock_product_domain(
                     psi.product_tmpl_id.id)
