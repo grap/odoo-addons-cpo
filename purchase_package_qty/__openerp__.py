@@ -66,4 +66,5 @@ Copyright, Author and Licence :
         'view/view.xml',
         'data/function.xml',
     ],
+    'installable': True,
 }

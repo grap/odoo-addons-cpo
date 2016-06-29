@@ -83,12 +83,13 @@ class PurchaseOrderLine(Model):
     def onchange_product_id(
             self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
             partner_id, date_order=False, fiscal_position_id=False,
-            date_planned=False, name=False, price_unit=False, context=None):
+            date_planned=False, name=False, price_unit=False, state='draft',
+            context=None):
         res = super(PurchaseOrderLine, self).onchange_product_id(
             cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id,
             date_order=date_order, fiscal_position_id=fiscal_position_id,
             date_planned=date_planned, name=name, price_unit=price_unit,
-            context=context)
+            state=state, context=context)
         if product_id:
             product_obj = self.pool.get('product.product')
             product = product_obj.browse(cr, uid, product_id, context=context)
