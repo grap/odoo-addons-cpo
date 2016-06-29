@@ -45,4 +45,5 @@ Contacts :
         'point_of_sale',
     ],
     'auto_install': True,
+    'installable': False,
 }

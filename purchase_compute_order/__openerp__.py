@@ -98,4 +98,5 @@ Copyright, Author and Licence :
         'view/view.xml',
         'view/menu.xml',
     ],
+    'installable': False,
 }

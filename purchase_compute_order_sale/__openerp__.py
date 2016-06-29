@@ -45,4 +45,5 @@ Contacts :
         'sale',
     ],
     'auto_install': True,
+    'installable': False,
 }
