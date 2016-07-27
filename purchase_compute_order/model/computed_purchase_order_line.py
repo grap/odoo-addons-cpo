@@ -122,6 +122,17 @@ class ComputedPurchaseOrderLine(models.Model):
     ]
 
     @api.multi
+    def _line_product_supplier_info(self):
+        self.ensure_one()
+        cpo_partner_id = self.computed_purchase_order_id.partner_id.id
+        product_tmpl_id = self.product_id.product_tmpl_id.id
+        psi = self.env['product.supplierinfo'].search([
+            ('name', '=', cpo_partner_id),
+            ('product_tmpl_id', '=', product_tmpl_id)
+        ])
+        return psi
+
+    @api.multi
     def _product_qty_available(self):
         for cpol in self:
             if cpol.product_id.id:
@@ -143,7 +154,6 @@ class ComputedPurchaseOrderLine(models.Model):
     @api.multi
     def _product_price_based_on(self, pricelist=False):
         pool_purchase_line = self.env['purchase.order.line']
-        psi_obj = self.env['product.supplierinfo']
 
         for cpol in self:
             unit_price = cpol.product_price
@@ -151,11 +161,7 @@ class ComputedPurchaseOrderLine(models.Model):
             cpo_partner_id = cpol.computed_purchase_order_id.partner_id.id
 
             if pricelist:
-                product_tmpl = cpol.product_id.product_tmpl_id
-                psi = psi_obj.search([
-                    ('name', '=', cpo_partner_id),
-                    ('product_tmpl_id', '=', product_tmpl.id)
-                ])
+                psi = cpol._line_product_supplier_info()
                 if psi:
                     unit_price = (
                         psi.pricelist_ids and
@@ -180,7 +186,6 @@ class ComputedPurchaseOrderLine(models.Model):
 
     @api.multi
     def _get_product_information(self):
-        psi_obj = self.env['product.supplierinfo']
         for cpol in self:
             if not cpol.product_id:
                 cpol.product_code_inv = None
@@ -193,12 +198,7 @@ class ComputedPurchaseOrderLine(models.Model):
                 cpol.product_price_inv = cpol._product_price_based_on(),
                 cpol.package_quantity_inv = cpol.package_quantity
             else:
-                psi = psi_obj.search([
-                    ('name', '=',
-                        cpol.computed_purchase_order_id.partner_id.id),
-                    ('product_tmpl_id', '=',
-                        cpol.product_id.product_tmpl_id.id)
-                ])
+                psi = cpol._line_product_supplier_info()
                 if psi:
                     cpol.product_code_inv = psi.product_code
                     cpol.product_name_inv = psi.product_name
@@ -261,7 +261,6 @@ class ComputedPurchaseOrderLine(models.Model):
         if not self.product_id:
             return
         else:
-            psi_obj = self.env['product.supplierinfo']
             pp = self.product_id
             computed_qty = pp.qty_available
 
@@ -294,10 +293,7 @@ class ComputedPurchaseOrderLine(models.Model):
             # If product is in the supplierinfo,
             # retrieve values and set state up_to_date
             if cpo.partner_id:
-                psi = psi_obj.search([
-                    ('name', '=', cpo.partner_id.id),
-                    ('product_tmpl_id', '=', pp.product_tmpl_id.id)
-                ])
+                psi = self._line_product_supplier_info()
                 if psi:
                     self.product_code_inv = psi.product_code
                     self.product_name_inv = psi.product_name
@@ -309,16 +305,9 @@ class ComputedPurchaseOrderLine(models.Model):
 
     @api.multi
     def unlink_psi(self):
-        psi_obj = self.env["product.supplierinfo"]
         psi2unlink = []
         for cpol in self:
-            cpo = cpol.computed_purchase_order_id
-            partner_id = cpo.partner_id.id
-            product_tmpl_id = cpol.product_id.product_tmpl_id.id
-            psi_ids = psi_obj.search([
-                ('name', '=', partner_id),
-                ('product_tmpl_id', '=', product_tmpl_id)
-            ])
+            psi_ids = cpol._line_product_supplier_info()
             psi2unlink += psi_ids
         for psi in psi2unlink:
             psi.unlink()
@@ -326,24 +315,29 @@ class ComputedPurchaseOrderLine(models.Model):
         return True
 
     @api.multi
+    def _prepare_psi_values(self):
+        self.ensure_one()
+        cpo = self.computed_purchase_order_id
+        partner_id = cpo.partner_id.id
+        product_tmpl_id = self.product_id.product_tmpl_id.id
+        values = {
+            'name': partner_id,
+            'product_name': self.product_name,
+            'product_code': self.product_code,
+            'product_uom': self.uom_po_id.id,
+            'package_qty': self.package_quantity_inv,
+            'min_qty': self.package_quantity,
+            'product_tmpl_id': product_tmpl_id,
+            'pricelist_ids': [(0, 0, {
+                'min_quantity': 0, 'price': self.product_price_inv})],
+        }
+        return values
+
+    @api.multi
     def create_psi(self):
         psi_obj = self.env['product.supplierinfo']
         for cpol in self:
-            cpo = cpol.computed_purchase_order_id
-            partner_id = cpo.partner_id.id
-            product_tmpl_id = cpol.product_id.product_tmpl_id.id
-
-            values = {
-                'name': partner_id,
-                'product_name': cpol.product_name,
-                'product_code': cpol.product_code,
-                'product_uom': cpol.uom_po_id.id,
-                'package_qty': cpol.package_quantity_inv,
-                'min_qty': cpol.package_quantity,
-                'product_tmpl_id': product_tmpl_id,
-                'pricelist_ids': [(0, 0, {
-                    'min_quantity': 0, 'price': cpol.product_price_inv})],
-            }
+            values = cpol._prepare_psi_values()
             psi_id = psi_obj.create(values)
             cpol.write({'state': 'up_to_date'})
             return psi_id
