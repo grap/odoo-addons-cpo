@@ -245,10 +245,10 @@ class ComputedPurchaseOrder(models.Model):
             if line.purchase_qty != 0:
                 line_values = {
                     'name': "%s%s" % (
-                        line.product_code_inv
-                            and '[' + line.product_code_inv + '] ' or '',
-                        line.product_name_inv
-                            or line.product_id.name_template),
+                        line.product_code_inv and
+                            '[' + line.product_code_inv + '] ' or '',
+                        line.product_name_inv or
+                        line.product_id.name_template),
                     'product_qty': line.purchase_qty,
                     'date_planned': (
                         self.incoming_date or fields.Date.context_today(self)),
@@ -269,8 +269,8 @@ class ComputedPurchaseOrder(models.Model):
         for line in self.line_ids:
             if line.average_consumption:
                 quantity = max(
-                    days * line.average_consumption * line.uom_po_id.factor
-                    / line.uom_id.factor - line.computed_qty, 0)
+                    days * line.average_consumption * line.uom_po_id.factor /
+                    line.uom_id.factor - line.computed_qty, 0)
                 if self.growth_factor != 0:
                     quantity_growth_factor = (
                         quantity * self.growth_factor / 100)
@@ -304,9 +304,9 @@ class ComputedPurchaseOrder(models.Model):
             for line in cpo.line_ids:
                 if line.average_consumption:
                     quantity = max(
-                        days * line.average_consumption
-                        * line.uom_po_id.factor / line.uom_id.factor
-                        - line.computed_qty, 0)
+                        days * line.average_consumption *
+                        line.uom_po_id.factor / line.uom_id.factor -
+                        line.computed_qty, 0)
                     if line.package_quantity and \
                             (quantity % line.package_quantity):
                         quantity = ceil(quantity / line.package_quantity)\
