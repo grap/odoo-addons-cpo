@@ -367,20 +367,25 @@ class ComputedPurchaseOrder(models.Model):
 
             # Get product_product and compute stock
             psi_ids = cpo._get_product_supplierinfo()
+            # Already created product lines in cpol. Used to avoid line
+            # duplication when supplier is defined in variants
+            cpol_product_ids = []
             for psi in psi_ids:
                 product_domain = self._active_product_stock_product_domain(
                     psi.product_tmpl_id.id)
                 pp_ids = pp_obj.search(product_domain)
                 for pp in pp_ids:
-                    cpol_list.append((0, 0, {
-                        'product_id': pp.id,
-                        'state': 'up_to_date',
-                        'product_code': psi.product_code,
-                        'product_name': psi.product_name,
-                        'package_quantity': psi.package_qty or psi.min_qty,
-                        'average_consumption': pp.average_consumption,
-                        'uom_po_id': psi.product_uom.id,
-                    }))
+                    if pp.id not in cpol_product_ids:
+                        cpol_list.append((0, 0, {
+                            'product_id': pp.id,
+                            'state': 'up_to_date',
+                            'product_code': psi.product_code,
+                            'product_name': psi.product_name,
+                            'package_quantity': psi.package_qty or psi.min_qty,
+                            'average_consumption': pp.average_consumption,
+                            'uom_po_id': psi.product_uom.id,
+                        }))
+                        cpol_product_ids.append(pp.id)
             # update line_ids
             cpo.write({'line_ids': cpol_list})
         return True
