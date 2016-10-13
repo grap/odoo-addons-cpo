@@ -195,7 +195,7 @@ class ComputedPurchaseOrderLine(models.Model):
             elif cpol.state in ('updated', 'new'):
                 cpol.product_code_inv = cpol.product_code
                 cpol.product_name_inv = cpol.product_name
-                cpol.product_price_inv = cpol._product_price_based_on(),
+                cpol.product_price_inv = cpol._product_price_based_on()
                 cpol.package_quantity_inv = cpol.package_quantity
             else:
                 psi = cpol._line_product_supplier_info()
@@ -205,33 +205,29 @@ class ComputedPurchaseOrderLine(models.Model):
                     cpol.product_price_inv = cpol._product_price_based_on(True)
                     cpol.package_quantity_inv = psi.package_qty
 
-    @api.multi
-    def _set_product_code(self, field_value):
-        vals = {'product_code': field_value}
+    @api.one
+    def _set_product_code(self):
         if self.state == 'up_to_date':
-            vals.update({'state': 'updated'})
-        return self.write(vals)
+            self.state = 'updated'
+        self.product_code = self.product_code_inv
 
-    @api.multi
-    def _set_product_name(self, field_value):
-        vals = {'product_name': field_value}
+    @api.one
+    def _set_product_name(self):
         if self.state == 'up_to_date':
-            vals.update({'state': 'updated'})
-        return self.write(vals)
+            self.state = 'updated'
+        self.product_name = self.product_name_inv
 
-    @api.multi
-    def _set_product_price(self, field_value):
-        vals = {'product_price': field_value}
+    @api.one
+    def _set_product_price(self):
         if self.state == 'up_to_date':
-            vals.update({'state': 'updated'})
-        return self.write(vals)
+            self.state = 'updated'
+        self.product_price = self.product_price_inv
 
-    @api.multi
-    def _set_package_quantity(self, field_value):
-        vals = {'package_quantity': field_value}
+    @api.one
+    def _set_package_quantity(self):
         if self.state == 'up_to_date':
-            vals.update({'state': 'updated'})
-        return self.write(vals)
+            self.state = 'updated'
+        self.package_quantity = self.package_quantity_inv
 
     @api.multi
     def _compute_stock_duration(self):
