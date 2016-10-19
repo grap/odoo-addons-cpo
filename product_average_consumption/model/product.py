@@ -43,8 +43,9 @@ class ProductProduct(models.Model):
         """ since the first purchase or sale of the product if it's"""
         """ more recent""")
 
-    @api.one
+    @api.multi
     def _min_date(self):
+        self.ensure_one()
         query = """SELECT to_char(min(date), 'YYYY-MM-DD') \
                 from stock_move where product_id = %s""" % (self.id)
         self.env.cr.execute(query)
@@ -58,8 +59,8 @@ class ProductProduct(models.Model):
         product_ids = map(lambda p: p.id, self)
         first_date = time.strftime('%Y-%m-%d')
         begin_date = (
-            datetime.datetime.today()
-            - datetime.timedelta(days=365)).strftime('%Y-%m-%d')
+            datetime.datetime.today() -
+            datetime.timedelta(days=365)).strftime('%Y-%m-%d')
         ctx = dict(self.env.context)
         ctx.update({
             'from_date': begin_date
@@ -82,8 +83,8 @@ class ProductProduct(models.Model):
                 precision_rounding=product.uom_id.rounding)
             first_date = max(begin_date, product.with_context(ctx)._min_date())
             nb_days = (
-                datetime.datetime.today()
-                - datetime.datetime.strptime(first_date, '%Y-%m-%d')
+                datetime.datetime.today() -
+                datetime.datetime.strptime(first_date, '%Y-%m-%d')
             ).days
             product.average_consumption = (
                 nb_days and qty_out / nb_days or 0.0)
