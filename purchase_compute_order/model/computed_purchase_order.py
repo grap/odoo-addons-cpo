@@ -339,10 +339,10 @@ class ComputedPurchaseOrder(models.Model):
         return total >= target
 
     @api.multi
-    def _active_product_stock_product_domain(self, template_id):
+    def _active_product_stock_product_domain(self, psi):
         self.ensure_one()
         product_domain = [
-            ('product_tmpl_id', '=', template_id),
+            ('product_tmpl_id', '=', psi.product_tmpl_id.id),
             ('state', 'not in', ('end', 'obsolete'))
         ]
         return product_domain
@@ -371,8 +371,7 @@ class ComputedPurchaseOrder(models.Model):
             # duplication when supplier is defined in variants
             cpol_product_ids = []
             for psi in psi_ids:
-                product_domain = self._active_product_stock_product_domain(
-                    psi.product_tmpl_id.id)
+                product_domain = self._active_product_stock_product_domain(psi)
                 pp_ids = pp_obj.search(product_domain)
                 for pp in pp_ids:
                     if pp.id not in cpol_product_ids:
