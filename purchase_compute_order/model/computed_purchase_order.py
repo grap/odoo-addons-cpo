@@ -244,11 +244,7 @@ class ComputedPurchaseOrder(models.Model):
         for line in self.line_ids:
             if line.purchase_qty != 0:
                 line_values = {
-                    'name': "%s%s" % (
-                        line.product_code_inv and
-                            '[' + line.product_code_inv + '] ' or '',
-                        line.product_name_inv or
-                        line.product_id.name_template),
+                    'name': line.product_id.display_name,
                     'product_qty': line.purchase_qty,
                     'date_planned': (
                         self.incoming_date or fields.Date.context_today(self)),
