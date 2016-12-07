@@ -20,8 +20,11 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+import logging
 from openerp import models, fields, api, _, exceptions
 import openerp.addons.decimal_precision as dp
+
+_logger = logging.getLogger(__name__)
 
 
 class ComputedPurchaseOrderLine(models.Model):
@@ -98,17 +101,17 @@ class ComputedPurchaseOrderLine(models.Model):
         'Quantity On Hand', compute='_product_qty_available',
         help="The available quantity on hand for this product")
     incoming_qty = fields.Float(
-        'Incoming Quantity', related='product_id.incoming_qty',
-        help="Virtual incoming entries", store=True)
+        'Incoming Quantity', compute='_product_qty_available',
+        help="Virtual incoming entries", store=False)
     outgoing_qty = fields.Float(
-        'Outgoing Quantity', related='product_id.outgoing_qty',
-        help="Virtual outgoing entries", store=True)
+        'Outgoing Quantity', compute='_product_qty_available',
+        help="Virtual outgoing entries", store=False)
     draft_incoming_qty = fields.Float(
-        'Draft Incoming Quantity', related='product_id.draft_incoming_qty',
-        help="Draft purchases", store=True)
+        'Draft Incoming Quantity', compute='_product_qty_available',
+        help="Draft purchases", store=False)
     draft_outgoing_qty = fields.Float(
-        'Draft Outgoing Quantity', related='product_id.draft_outgoing_qty',
-        help="Draft sales", store=True)
+        'Draft Outgoing Quantity', compute='_product_qty_available',
+        help="Draft sales", store=False)
     computed_qty = fields.Float(
         string='Computed Stock', compute='_get_computed_qty',
         help="The sum of all quantities selected.",
@@ -139,6 +142,10 @@ class ComputedPurchaseOrderLine(models.Model):
                 product_qty = cpol.product_id._product_available()[
                     cpol.product_id.id]
                 cpol.qty_available = product_qty['qty_available']
+                cpol.outgoing_qty = product_qty['outgoing_qty']
+                cpol.incoming_qty = product_qty['incoming_qty']
+                cpol.draft_incoming_qty = cpol.product_id.draft_incoming_qty
+                cpol.draft_outgoing_qty = cpol.product_id.draft_outgoing_qty
 
     @api.multi
     def _get_computed_qty(self):
@@ -205,29 +212,33 @@ class ComputedPurchaseOrderLine(models.Model):
                     cpol.product_price_inv = cpol._product_price_based_on(True)
                     cpol.package_quantity_inv = psi.package_qty
 
-    @api.one
+    @api.multi
     def _set_product_code(self):
-        if self.state == 'up_to_date':
-            self.state = 'updated'
-        self.product_code = self.product_code_inv
+        for line in self:
+            if line.state == 'up_to_date':
+                line.state = 'updated'
+            line.product_code = line.product_code_inv
 
-    @api.one
+    @api.multi
     def _set_product_name(self):
-        if self.state == 'up_to_date':
-            self.state = 'updated'
-        self.product_name = self.product_name_inv
+        for line in self:
+            if line.state == 'up_to_date':
+                line.state = 'updated'
+            line.product_name = line.product_name_inv
 
-    @api.one
+    @api.multi
     def _set_product_price(self):
-        if self.state == 'up_to_date':
-            self.state = 'updated'
-        self.product_price = self.product_price_inv
+        for line in self:
+            if line.state == 'up_to_date':
+                line.state = 'updated'
+            line.product_price = line.product_price_inv
 
-    @api.one
+    @api.multi
     def _set_package_quantity(self):
-        if self.state == 'up_to_date':
-            self.state = 'updated'
-        self.package_quantity = self.package_quantity_inv
+        for line in self:
+            if line.state == 'up_to_date':
+                line.state = 'updated'
+            line.package_quantity = line.package_quantity_inv
 
     @api.multi
     def _compute_stock_duration(self):

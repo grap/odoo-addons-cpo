@@ -22,9 +22,12 @@
 ##############################################################################
 import datetime
 import time
+import logging
 from math import ceil
 from openerp import models, fields, api, _, exceptions
 import openerp.addons.decimal_precision as dp
+
+_logger = logging.getLogger(__name__)
 
 
 class ComputedPurchaseOrder(models.Model):
@@ -116,7 +119,8 @@ class ComputedPurchaseOrder(models.Model):
         help="Supplier of the purchase order.")
     line_ids = fields.One2many(
         'computed.purchase.order.line', 'computed_purchase_order_id',
-        string='Order Lines', help="Products to order.")
+        string='Order Lines', help="Products to order.",
+        ondelete='cascade')
 
     # this is to be able to display the line_ids on 2 tabs of the view
     # TODO: If not works add compute: compute='_get_stock_line_ids',
@@ -335,10 +339,18 @@ class ComputedPurchaseOrder(models.Model):
         return total >= target
 
     @api.multi
-    def _active_product_stock_product_domain(self, psi):
+    def _active_product_stock_product_domain(self, psi_ids):
         self.ensure_one()
+        self.env.cr.execute("""
+            SELECT product_tmpl_id
+            FROM product_supplierinfo
+            WHERE id in %s
+              AND product_tmpl_id is not null
+        """, (tuple(psi_ids),))
+        result = self.env.cr.fetchall()
+        tmpl_ids = map(lambda r: r[0], result)
         product_domain = [
-            ('product_tmpl_id', '=', psi.product_tmpl_id.id),
+            ('product_tmpl_id', 'in', tmpl_ids),
             ('state', 'not in', ('end', 'obsolete'))
         ]
         return product_domain
@@ -366,21 +378,25 @@ class ComputedPurchaseOrder(models.Model):
             # Already created product lines in cpol. Used to avoid line
             # duplication when supplier is defined in variants
             cpol_product_ids = []
-            for psi in psi_ids:
-                product_domain = self._active_product_stock_product_domain(psi)
-                pp_ids = pp_obj.search(product_domain)
-                for pp in pp_ids:
-                    if pp.id not in cpol_product_ids:
-                        cpol_list.append((0, 0, {
-                            'product_id': pp.id,
-                            'state': 'up_to_date',
-                            'product_code': psi.product_code,
-                            'product_name': psi.product_name,
-                            'package_quantity': psi.package_qty or psi.min_qty,
-                            'average_consumption': pp.average_consumption,
-                            'uom_po_id': psi.product_uom.id,
-                        }))
-                        cpol_product_ids.append(pp.id)
+            product_domain = self._active_product_stock_product_domain(
+                psi_ids.ids)
+            pp_ids = pp_obj.search(product_domain)
+            for pp in pp_ids:
+                if pp.id not in cpol_product_ids:
+                    psi = filter(
+                        lambda ps: ps.name.id == cpo.partner_id.id,
+                        pp.seller_ids)
+                    cpol_list.append((0, 0, {
+                        'product_id': pp.id,
+                        'state': 'up_to_date',
+                        'product_code': psi and psi[0].product_code,
+                        'product_name': psi and psi[0].product_name,
+                        'package_quantity': psi and (
+                            psi[0].package_qty or psi[0].min_qty) or 1.0,
+                        'average_consumption': pp.average_consumption,
+                        'uom_po_id': psi.product_uom.id,
+                    }))
+                    cpol_product_ids.append(pp.id)
             # update line_ids
             cpo.write({'line_ids': cpol_list})
         return True
