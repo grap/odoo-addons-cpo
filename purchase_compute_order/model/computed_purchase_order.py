@@ -381,6 +381,7 @@ class ComputedPurchaseOrder(models.Model):
             product_domain = self._active_product_stock_product_domain(
                 psi_ids.ids)
             pp_ids = pp_obj.search(product_domain)
+            pp_ids.refresh()  # Clear product cache
             for pp in pp_ids:
                 if pp.id not in cpol_product_ids:
                     psi = filter(
