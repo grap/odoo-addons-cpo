@@ -226,7 +226,7 @@ msgstr "Compras borrador"
 #. module: purchase_compute_order
 #: field:computed.purchase.order,compute_draft_quantity:0
 msgid "Draft quantity taken in account"
-msgstr "Tener en cuenta cantidades de ventas presupuestadas"
+msgstr "Desglose de stock en base cantidades de pedidos presupuestados"
 
 #. module: purchase_compute_order
 #: help:computed.purchase.order.line,draft_outgoing_qty:0
@@ -416,7 +416,7 @@ msgstr "Información de empresa"
 #. module: purchase_compute_order
 #: field:computed.purchase.order,compute_pending_quantity:0
 msgid "Pending quantity taken in account"
-msgstr "Tener en cuenta cantidades de ventas confirmadas"
+msgstr "Desglose de stock en base a cantidades de pedidos confirmado"
 
 #. module: purchase_compute_order
 #: field:computed.purchase.order.line,product_id:0
@@ -443,7 +443,7 @@ msgstr "Precio basado en"
 #. module: purchase_compute_order
 #: view:computed.purchase.order:purchase_compute_order.view_computed_purchase_order_form
 msgid "Products To Include"
-msgstr "Productos a incluir"
+msgstr "Gestión de productos"
 
 #. module: purchase_compute_order
 #: help:computed.purchase.order,line_ids:0
