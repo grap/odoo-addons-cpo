@@ -1,7 +1,6 @@
-# -*- encoding: utf-8 -*-
 ##############################################################################
 #
-#    Purchase - Package Quantity Module for Odoo
+#    Product - Average Consumption Module for Odoo
 #    Copyright (C) 2013-Today GRAP (http://www.grap.coop)
 #    @author Julien WESTE
 #    @author Sylvain LE GAL (https://twitter.com/legalsylvain)
@@ -20,5 +19,32 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+{
+    'name': 'Product - Average Consumption',
+    'version': '11.0.1.0.0',
+    'category': 'Product',
+    'description': """
+Shows figures in the product form about the average consumption of products
+===========================================================================
 
-from . import model
+Copyright, Author and Licence :
+-------------------------------
+    * Copyright : 2013-Today, Groupement Régional Alimentaire de Proximité;
+    * Author :
+        * Julien WESTE;
+        * Sylvain LE GAL (https://twitter.com/legalsylvain);
+    * Licence : AGPL-3 (http://www.gnu.org/licenses/)
+    """,
+    'author': 'GRAP',
+    'website': 'http://www.grap.coop',
+    'license': 'AGPL-3',
+    'license': 'AGPL-3',
+    'depends': [
+        'product',
+        'stock',
+    ],
+    'data': [
+        'view/view.xml',
+    ],
+    'installable': True,
+}

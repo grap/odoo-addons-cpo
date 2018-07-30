@@ -26,7 +26,7 @@
             <field name="model">product.product</field>
             <field name="inherit_id" ref="product.product_normal_form_view"/>
             <field name="arch" type="xml">
-                <group name="procurement_uom" position="after">
+                <group name="group_standard_price" position="after">
                     <group name="Consumption" string="Consumption figures">
                         <field name="nb_days"/>
                         <field name="total_consumption"/>

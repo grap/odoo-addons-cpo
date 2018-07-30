@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 ##############################################################################
 #
 #    Product - Average Consumption Module for Odoo
@@ -56,7 +55,7 @@ class ProductProduct(models.Model):
     @api.multi
     def _average_consumption(self):
         self.refresh()
-        product_ids = map(lambda p: p.id, self)
+        product_ids = [p.id for p in self]
         first_date = time.strftime('%Y-%m-%d')
         begin_date = (
             datetime.datetime.today() -
@@ -69,7 +68,7 @@ class ProductProduct(models.Model):
         domain_move_out = []
         domain_quant_loc, domain_move_in_loc, domain_move_out_loc = \
             self._get_domain_locations()
-        domain_move_out += self.with_context(ctx)._get_domain_dates() \
+        domain_move_out += self._get_domain_dates(ctx) \
             + [('state', 'in', ('confirmed', 'waiting', 'assigned', 'done'))] \
             + domain_products
         domain_move_out += domain_move_out_loc
@@ -91,3 +90,13 @@ class ProductProduct(models.Model):
             product.total_consumption = qty_out or 0.0
             product.nb_days = nb_days or 0.0
         return True
+
+    def _get_domain_dates(self, context):
+        from_date = context.get('from_date', False)
+        to_date = context.get('to_date', False)
+        domain = []
+        if from_date:
+            domain.append(('date', '>=', from_date))
+        if to_date:
+            domain.append(('date', '<=', to_date))
+        return domain
