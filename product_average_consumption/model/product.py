@@ -31,10 +31,28 @@ class ProductProduct(models.Model):
 
     average_consumption = fields.Float(
         compute='_average_consumption',
-        string='Average Consumption per day')
+        string='Average Consumption (max 365 days)')
     total_consumption = fields.Float(
         compute='_average_consumption',
-        string='Total Consumption')
+        string='Total Consumption (ud. max 365 days)')
+    average_consumption_15 = fields.Float(
+        compute='_average_consumption_fixed',
+        string='Average Consumption (15 days)')
+    total_consumption_15 = fields.Float(
+        compute='_average_consumption_fixed',
+        string='Total Consumption (ud. 15 days)')
+    average_consumption_30 = fields.Float(
+        compute='_average_consumption_fixed',
+        string='Average Consumption (30 days)')
+    total_consumption_30 = fields.Float(
+        compute='_average_consumption_fixed',
+        string='Total Consumption (ud. 30 days)')
+    average_consumption_90 = fields.Float(
+        compute='_average_consumption_fixed',
+        string='Average Consumption (90 days)')
+    total_consumption_90 = fields.Float(
+        compute='_average_consumption_fixed',
+        string='Total Consumption (ud. 90 days)')
     nb_days = fields.Float(
         compute='_average_consumption',
         string='Number of days for the calculation',
@@ -56,10 +74,49 @@ class ProductProduct(models.Model):
     def _average_consumption(self):
         self.refresh()
         product_ids = [p.id for p in self]
+        self.calculate_average_days(product_ids, 365)
+        self.calculate_average_days(product_ids, 15)
+        self.calculate_average_days(product_ids, 30)
+        self.calculate_average_days(product_ids, 90)
+        return True
+
+    @api.multi
+    def calculate_average_days(self, product_ids, n_days):
         first_date = time.strftime('%Y-%m-%d')
+        domain_move_out, begin_date, ctx = self.get_domain(product_ids, n_days)
+        moves_out = self.env['stock.move'].read_group(
+            domain_move_out, ['product_id', 'product_qty'], ['product_id'])
+        moves_out = dict(map(lambda x: (x['product_id'][0], x['product_qty']),
+                             moves_out))
+        for product in self:
+            qty_out = float_round(
+                moves_out.get(product.id, 0.0),
+                precision_rounding=product.uom_id.rounding)
+            first_date = max(begin_date, product.with_context(ctx)._min_date())
+            if n_days == 365:
+                nb_days = (
+                    datetime.datetime.today() -
+                    datetime.datetime.strptime(first_date, '%Y-%m-%d')
+                ).days
+                product.average_consumption = (
+                    nb_days and qty_out / nb_days or 0.0)
+                product.total_consumption = qty_out or 0.0
+                product.nb_days = nb_days or 0.0
+            elif n_days == 15:
+                product.average_consumption_15 = qty_out / 15 or 0.0
+                product.total_consumption_15 = qty_out or 0.0
+            elif n_days == 30:
+                product.average_consumption_30 = qty_out / 30 or 0.0
+                product.total_consumption_30 = qty_out or 0.0
+            elif n_days == 90:
+                product.average_consumption_90 = qty_out / 90 or 0.0
+                product.total_consumption_90 = qty_out or 0.0
+
+    @api.multi
+    def get_domain(self, product_ids, n_days):
         begin_date = (
             datetime.datetime.today() -
-            datetime.timedelta(days=365)).strftime('%Y-%m-%d')
+            datetime.timedelta(days=n_days)).strftime('%Y-%m-%d')
         ctx = dict(self.env.context)
         ctx.update({
             'from_date': begin_date
@@ -72,24 +129,7 @@ class ProductProduct(models.Model):
             + [('state', 'in', ('confirmed', 'waiting', 'assigned', 'done'))] \
             + domain_products
         domain_move_out += domain_move_out_loc
-        moves_out = self.env['stock.move'].read_group(
-            domain_move_out, ['product_id', 'product_qty'], ['product_id'])
-        moves_out = dict(map(lambda x: (x['product_id'][0], x['product_qty']),
-                             moves_out))
-        for product in self:
-            qty_out = float_round(
-                moves_out.get(product.id, 0.0),
-                precision_rounding=product.uom_id.rounding)
-            first_date = max(begin_date, product.with_context(ctx)._min_date())
-            nb_days = (
-                datetime.datetime.today() -
-                datetime.datetime.strptime(first_date, '%Y-%m-%d')
-            ).days
-            product.average_consumption = (
-                nb_days and qty_out / nb_days or 0.0)
-            product.total_consumption = qty_out or 0.0
-            product.nb_days = nb_days or 0.0
-        return True
+        return domain_move_out, begin_date, ctx
 
     def _get_domain_dates(self, context):
         from_date = context.get('from_date', False)

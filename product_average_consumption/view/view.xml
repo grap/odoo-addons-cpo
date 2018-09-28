@@ -31,6 +31,15 @@
                         <field name="nb_days"/>
                         <field name="total_consumption"/>
                         <field name="average_consumption"/>
+                        <separator string="Consumption last 15 days" colspan="4"/>
+                        <field name="total_consumption_15"/>
+                        <field name="average_consumption_15"/>
+                        <separator string="Consumption last 30 days" colspan="4"/>
+                        <field name="total_consumption_30"/>
+                        <field name="average_consumption_30"/>
+                        <separator string="Consumption last 90 days" colspan="4"/>
+                        <field name="total_consumption_90"/>
+                        <field name="average_consumption_90"/>
                     </group>
                 </group>
             </field>
