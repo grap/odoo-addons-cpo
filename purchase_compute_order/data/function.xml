@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- *********************************************************************** -->
+<!-- See __openerp__.py file for Copyright and Licence Informations.         -->
+<!-- *********************************************************************** -->
+<odoo>
+    <function model="product.supplierinfo" name="_delete_duplicates"/>
+</odoo>
