@@ -422,7 +422,7 @@ class ComputedPurchaseOrder(models.Model):
             'origin': self.name,
             'partner_id': partner.id,
             'location_id': company.partner_id.property_stock_customer.id,
-            'pricelist_id': partner.property_product_pricelist_purchase.id,
+            'pricelist_id': partner.property_product_pricelist.id,
             'order_line': po_lines,
         }
 

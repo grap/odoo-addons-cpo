@@ -38,13 +38,8 @@ class ProductProduct(models.Model):
         draft_qty = {}
         for line in sol_ids:
             draft_qty.setdefault(line.product_id.id, 0)
-            if line.product_uos:
-                draft_qty[line.product_id.id] += \
-                    line.product_uos_qty / line.product_uos.factor\
-                    * line.product_id.uom_id.factor
-            else:
-                draft_qty[line.product_id.id] += \
-                    line.product_uom_qty / line.product_uom.factor\
-                    * line.product_id.uom_id.factor
+            draft_qty[line.product_id.id] += \
+                line.product_uom_qty / line.product_uom.factor\
+                * line.product_id.uom_id.factor
         for pp in self:
             pp.draft_outgoing_qty += draft_qty.get(pp.id, 0)

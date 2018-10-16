@@ -97,11 +97,14 @@ class ProductProduct(models.Model):
                 nb_days = (
                     datetime.datetime.today() -
                     datetime.datetime.strptime(first_date, '%Y-%m-%d')
-                ).days
+                ).days or 1.0
                 product.average_consumption = (
                     nb_days and qty_out / nb_days or 0.0)
                 product.total_consumption = qty_out or 0.0
-                product.nb_days = nb_days or 0.0
+                if product.total_consumption == 0:
+                    product.nb_days = 0.0
+                else:
+                    product.nb_days = nb_days or 0.0
             elif n_days == 15:
                 product.average_consumption_15 = qty_out / 15 or 0.0
                 product.total_consumption_15 = qty_out or 0.0
