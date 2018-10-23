@@ -150,12 +150,12 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
-            <field name="user_id" position="after">
-                <group colspan='2' col='3'>
+             <xpath expr="//group[@name='purchase']" position="after">
+                 <group colspan='1' col='3'>
                     <field name="purchase_target"/>
                     <field name="target_type" nolabel="1"/>
-                </group>
-            </field>
+                 </group>
+             </xpath>
         </field>
     </record>
 </odoo>
