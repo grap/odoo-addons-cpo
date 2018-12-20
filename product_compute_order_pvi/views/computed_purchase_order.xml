@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+        <record id="view_computed_purchase_order_pvi_form" model="ir.ui.view">
+            <field name="name">computed.purchase.order.form</field>
+            <field name="model">computed.purchase.order</field>
+            <field name="inherit_id" ref="purchase_compute_order.view_computed_purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='compute_draft_quantity']" position="after">
+                    <field name="compute_pvi_d_quantity"/>
+                    <field name="compute_pvi_quantity"/>
+                </xpath>
+                <xpath expr="//field[@name='draft_outgoing_qty']" position="after">
+                    <field name="pvi_qty"/>
+                    <field name="pvi_draft_qty"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</openerp>

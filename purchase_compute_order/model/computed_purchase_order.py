@@ -399,8 +399,12 @@ class ComputedPurchaseOrder(models.Model):
                     }))
                     cpol_product_ids.append(pp.id)
             # update line_ids
-            cpo.write({'line_ids': cpol_list})
+            self.write_active_product_stock(cpo, cpol_list)
         return True
+
+    @api.multi
+    def write_active_product_stock(self, cpo, cpol_list):
+        cpo.write({'line_ids': cpol_list})
 
     @api.multi
     def compute_purchase_quantities(self):
