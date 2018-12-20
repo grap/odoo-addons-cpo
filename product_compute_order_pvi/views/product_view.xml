@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+        <record id="product_pvi_consumption_form_view" model="ir.ui.view">
+            <field name="name">product.consumption.form</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product_average_consumption.product_normal_form_view"/>
+            <field name="arch" type="xml">
+                <group name="Consumption" position="inside">
+                    <field name="average_consumption_pvi"/>
+                </group>
+            </field>
+        </record>
+    </data>
+</openerp>

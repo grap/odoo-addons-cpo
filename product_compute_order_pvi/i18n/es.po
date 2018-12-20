@@ -1,0 +1,65 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* product_compute_order_pvi
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 11.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2244-04-21 18:34+0000\n"
+"PO-Revision-Date: 2018-12-20 09:59+0100\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: es\n"
+"X-Generator: Poedit 1.8.7.1\n"
+
+#. module: product_compute_order_pvi
+#: model:ir.model.fields,field_description:product_compute_order_pvi.field_prestashop_product_combination_average_consumption_pvi
+#: model:ir.model.fields,field_description:product_compute_order_pvi.field_product_product_average_consumption_pvi
+msgid "Average Consumption with PVI"
+msgstr "Average Consumption with PVI"
+
+#. module: product_compute_order_pvi
+#: model:ir.model,name:product_compute_order_pvi.model_computed_purchase_order
+msgid "Computed Purchase Order"
+msgstr "Pedido calculado"
+
+#. module: product_compute_order_pvi
+#: model:ir.model,name:product_compute_order_pvi.model_computed_purchase_order_line
+msgid "Computed Purchase Order Line"
+msgstr "Líneas de pedido calculadas"
+
+#. module: product_compute_order_pvi
+#: model:ir.model.fields,field_description:product_compute_order_pvi.field_computed_purchase_order_compute_pvi_d_quantity
+msgid "Draft PVI taken in account"
+msgstr "Cantidad en borradores de PVI tenida en cuenta"
+
+#. module: product_compute_order_pvi
+#: model:ir.model.fields,help:product_compute_order_pvi.field_computed_purchase_order_line_pvi_draft_qty
+#: model:ir.model.fields,help:product_compute_order_pvi.field_computed_purchase_order_line_pvi_qty
+msgid "Draft sales"
+msgstr "Ventas en borrador"
+
+#. module: product_compute_order_pvi
+#: model:ir.model.fields,field_description:product_compute_order_pvi.field_computed_purchase_order_line_pvi_draft_qty
+msgid "PVI Draft Outgoing Quantity"
+msgstr "Cantidad de salida en borradores de PVI"
+
+#. module: product_compute_order_pvi
+#: model:ir.model.fields,field_description:product_compute_order_pvi.field_computed_purchase_order_line_pvi_qty
+msgid "PVI Outgoing Quantity"
+msgstr "Cantidad de salida de PVI"
+
+#. module: product_compute_order_pvi
+#: model:ir.model.fields,field_description:product_compute_order_pvi.field_computed_purchase_order_compute_pvi_quantity
+msgid "PVI quantity taken in account"
+msgstr "Cantidad en PVI tenida en cuenta"
+
+#. module: product_compute_order_pvi
+#: model:ir.model,name:product_compute_order_pvi.model_product_product
+msgid "Product"
+msgstr "Producto"
