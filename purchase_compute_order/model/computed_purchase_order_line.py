@@ -133,7 +133,6 @@ class ComputedPurchaseOrderLine(models.Model):
             ('name', '=', cpo_partner_id),
             ('product_tmpl_id', '=', product_tmpl_id)
         ], order='sequence', limit=1)
-        prod = self.product_id.product_tmpl_id.principal_supplier
         return psi
 
     @api.multi
