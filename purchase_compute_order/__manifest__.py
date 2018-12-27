@@ -43,5 +43,6 @@
         'view/action.xml',
         'view/view.xml',
         'view/menu.xml',
+        'view/purchase_order.xml',
     ],
 }
