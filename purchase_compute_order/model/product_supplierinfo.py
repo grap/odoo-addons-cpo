@@ -27,39 +27,41 @@ from openerp import models, api
 class ProductSupplierinfo(models.Model):
     _inherit = 'product.supplierinfo'
 
-    # Constraints section
-    _sql_constraints = [
-        (
-            'psi_product_name_uniq', 'unique(name, product_tmpl_id)',
-            """You cannot register several times the same supplier on a"""
-            """ product!"""),
-    ]
+    # # Constraints section
+    # _sql_constraints = [
+    #     (
+    #         'psi_product_name_uniq', 'unique(name, product_tmpl_id)',
+    #         """You cannot register several times the same supplier on a"""
+    #         """ product!"""),
+    # ]
+    # ALTER TABLE product_supplierinfo DROP CONSTRAINT
+    # product_supplierinfo_psi_product_name_uniq;
 
     # Private section
-    @api.model
-    def _delete_duplicates(self):
-        cr = self.env.cr
-        query = """
-            SELECT pp.id
-            FROM
-                product_supplierinfo psi
-                INNER JOIN product_template pt ON psi.product_tmpl_id = pt.id
-                INNER JOIN product_product pp ON pp.product_tmpl_id = pt.id
-            GROUP BY
-                pp.id, psi.name
-            HAVING
-                count(*) > 1"""
-        cr.execute(query)
-        product_ids = [x[0] for x in cr.fetchall()]
-        products = self.env['product.product'].browse(product_ids)
-
-        deleted_ids = []
-        for product in products:
-            delete = False
-            for psi in product.seller_ids:
-                if delete:
-                    deleted_ids.append(psi.id)
-                    psi.unlink()
-                else:
-                    delete = True
-        return deleted_ids
+    # @api.model
+    # def _delete_duplicates(self):
+    #     cr = self.env.cr
+    #     query = """
+    #         SELECT pp.id
+    #         FROM
+    #             product_supplierinfo psi
+    #             INNER JOIN product_template pt ON psi.product_tmpl_id = pt.id
+    #             INNER JOIN product_product pp ON pp.product_tmpl_id = pt.id
+    #         GROUP BY
+    #             pp.id, psi.name
+    #         HAVING
+    #             count(*) > 1"""
+    #     cr.execute(query)
+    #     product_ids = [x[0] for x in cr.fetchall()]
+    #     products = self.env['product.product'].browse(product_ids)
+    #
+    #     deleted_ids = []
+    #     for product in products:
+    #         delete = False
+    #         for psi in product.seller_ids:
+    #             if delete:
+    #                 deleted_ids.append(psi.id)
+    #                 psi.unlink()
+    #             else:
+    #                 delete = True
+    #     return deleted_ids

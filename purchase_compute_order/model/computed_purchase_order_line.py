@@ -132,7 +132,7 @@ class ComputedPurchaseOrderLine(models.Model):
         psi = self.env['product.supplierinfo'].search([
             ('name', '=', cpo_partner_id),
             ('product_tmpl_id', '=', product_tmpl_id)
-        ])
+        ], order='sequence', limit=1)
         return psi
 
     @api.multi
@@ -174,9 +174,15 @@ class ComputedPurchaseOrderLine(models.Model):
                     # unit_price = (
                     #     psi.pricelist_ids and
                     #     psi.pricelist_ids[0].price or
-                    #     psi.product_tmpl_id.standard_price)
-                    unit_price = psi.product_tmpl_id.standard_price
-
+                    # #     psi.product_tmpl_id.standard_price)
+                    # if psi.price and purchase_qty >= psi.min_qty:
+                    #     unit_price = psi.price
+                    # else:
+                    if psi.price and cpol.purchase_qty >= psi.min_qty:
+                        unit_price = psi.price
+                        print(unit_price)
+                    else:
+                        unit_price = psi.product_tmpl_id.standard_price
             if cpo_product_price == 'last_purchase':
                 purch_line_price = pool_purchase_line.search([
                     ('product_id', '=', cpol.product_id.id)

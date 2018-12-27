@@ -36,7 +36,6 @@
         'purchase',
     ],
     'data': [
-        'data/function.xml',
         'data/ir_sequence.xml',
         'security/ir_rule_data.yml',
         'security/ir_model_access_data.yml',
