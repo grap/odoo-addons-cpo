@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- © 2018 FactorLibre - Álvaro Marcos <alvaro.marcos@factorlibre.com>
+License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html). -->
+<openerp>
+  <data>
+    <record id="purchase_order_comp_view" model="ir.ui.view">
+        <field name="name">purchase.order.form</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="computed_order" attrs="{'invisible': [('computed_order', '=', False)]}"/>
+            </xpath>
+        </field>
+    </record>
+  </data>
+</openerp>

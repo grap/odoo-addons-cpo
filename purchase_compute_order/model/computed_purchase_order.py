@@ -428,6 +428,7 @@ class ComputedPurchaseOrder(models.Model):
             'location_id': company.partner_id.property_stock_customer.id,
             'pricelist_id': partner.property_product_pricelist.id,
             'order_line': po_lines,
+            'computed_order': self.id,
         }
 
     @api.multi

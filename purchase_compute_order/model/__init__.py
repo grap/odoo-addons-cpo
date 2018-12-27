@@ -25,4 +25,5 @@ from . import computed_purchase_order
 from . import computed_purchase_order_line
 from . import product_product
 from . import res_partner
+from . import purchase_order
 # from . import product_supplierinfo
