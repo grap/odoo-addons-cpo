@@ -116,6 +116,7 @@ class ComputedPurchaseOrderLine(models.Model):
         string='Computed Stock', compute='_get_computed_qty',
         help="The sum of all quantities selected.",
         digits_compute=dp.get_precision('Product UoM'))
+    supplier = fields.Many2one(string='Supplier', compute='_get_computed_qty')
 
     # Constraints section
     _sql_constraints = [
@@ -131,8 +132,9 @@ class ComputedPurchaseOrderLine(models.Model):
         product_tmpl_id = self.product_id.product_tmpl_id.id
         psi = self.env['product.supplierinfo'].search([
             ('name', '=', cpo_partner_id),
-            ('product_tmpl_id', '=', product_tmpl_id)
-        ], order='sequence', limit=1)
+            ('product_tmpl_id', '=', product_tmpl_id),
+            ('min_qty', '<=', self.purchase_qty)
+        ], order='price', limit=1)
         return psi
 
     @api.multi
