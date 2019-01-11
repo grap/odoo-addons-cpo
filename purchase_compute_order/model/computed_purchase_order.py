@@ -280,7 +280,6 @@ class ComputedPurchaseOrder(models.Model):
                     quantity_growth_factor = (
                         quantity * self.growth_factor / 100)
                     quantity = quantity + round(quantity_growth_factor)
-
                 if line.package_quantity and quantity % line.package_quantity:
                     quantity = ceil(quantity / line.package_quantity)\
                         * line.package_quantity
@@ -397,7 +396,10 @@ class ComputedPurchaseOrder(models.Model):
                         'product_name': psi and psi[0].product_name,
                         'package_quantity': psi and (
                             (hasattr(psi[0], 'package_qty') and
-                             psi[0].package_qty) or psi[0].min_qty) or 1.0,
+                             psi[0].package_qty)) or 1.0,
+                        # 'package_quantity': psi and (
+                        #     (hasattr(psi[0], 'package_qty') and
+                        #      psi[0].package_qty) or psi[0].min_qty) or 1.0,
                         'average_consumption': pp.average_consumption,
                         'uom_po_id':
                             psi and psi[0].product_uom.id or pp.uom_po_id.id,
