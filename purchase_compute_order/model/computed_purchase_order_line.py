@@ -116,7 +116,7 @@ class ComputedPurchaseOrderLine(models.Model):
         string='Computed Stock', compute='_get_computed_qty',
         help="The sum of all quantities selected.",
         digits_compute=dp.get_precision('Product UoM'))
-    supplier = fields.Many2one(string='Supplier', compute='_get_computed_qty')
+    supplier = fields.Many2one('product.supplierinfo', 'Supplier')
 
     # Constraints section
     _sql_constraints = [
@@ -182,7 +182,6 @@ class ComputedPurchaseOrderLine(models.Model):
                     # else:
                     if psi.price and cpol.purchase_qty >= psi.min_qty:
                         unit_price = psi.price
-                        print(unit_price)
                     else:
                         unit_price = psi.product_tmpl_id.standard_price
             if cpo_product_price == 'last_purchase':
@@ -220,6 +219,7 @@ class ComputedPurchaseOrderLine(models.Model):
                     cpol.product_code_inv = psi.product_code
                     cpol.product_name_inv = psi.product_name
                     cpol.product_price_inv = cpol._product_price_based_on(True)
+                    cpol.supplier = psi
                     cpol.package_quantity_inv = (
                         hasattr(psi, 'package_qty') and psi.package_qty or 1.0)
 
