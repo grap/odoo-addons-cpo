@@ -9,7 +9,7 @@ class PurchaseOrderLine(models.Model):
     @api.onchange('supplier_id')
     def onchange_supplier(self):
         data_dict = {
-            'name': self.supplier_id.product_name,
+            'name': self.supplier_id.product_name or '',
             'product_qty': self.supplier_id.min_qty,
             'price_unit': self.supplier_id.price,
             'discount': self.supplier_id.discount,
@@ -25,6 +25,14 @@ class PurchaseOrderLine(models.Model):
     supplier_id = fields.Many2one('product.supplierinfo', 'Proveedor')
     product_tmpl_id = fields.Many2one('product.template', 'Plantilla',
                                       compute='_get_product_tmpl')
+
+    @api.onchange('product_id')
+    def onchange_product_id(self):
+        for line in self:
+            line.supplier_id = False
+            product = line.product_id
+            line.name = "[%s] %s" % (product.default_code, product.name)
+            line._get_product_tmpl()
 
 
 class ProductSupplierinfo(models.Model):
