@@ -9,7 +9,7 @@ class PurchaseOrderLine(models.Model):
     @api.onchange('supplier_id')
     def onchange_supplier(self):
         data_dict = {
-            'name': self.supplier_id.product_name or '',
+            'name': self.supplier_id.product_name or self.product_id.name,
             'product_qty': self.supplier_id.min_qty,
             'price_unit': self.supplier_id.price,
             'discount': self.supplier_id.discount,
@@ -27,7 +27,7 @@ class PurchaseOrderLine(models.Model):
                                       compute='_get_product_tmpl')
 
     @api.onchange('product_id')
-    def onchange_product_id(self):
+    def onchange_product_id_supp(self):
         for line in self:
             line.supplier_id = False
             product = line.product_id
