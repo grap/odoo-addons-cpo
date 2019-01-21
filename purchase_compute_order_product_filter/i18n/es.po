@@ -1,0 +1,113 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* purchase_compute_order_product_filter
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 11.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-01-21 10:00+0000\n"
+"PO-Revision-Date: 2019-01-21 11:05+0100\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: es\n"
+"X-Generator: Poedit 1.8.7.1\n"
+
+#. module: purchase_compute_order_product_filter
+#: model:ir.model,name:purchase_compute_order_product_filter.model_computed_purchase_order
+msgid "Computed Purchase Order"
+msgstr "Pedido calculado"
+
+#. module: purchase_compute_order_product_filter
+#: model:ir.model.fields,field_description:purchase_compute_order_product_filter.field_product_state_info_create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: purchase_compute_order_product_filter
+#: model:ir.model.fields,field_description:purchase_compute_order_product_filter.field_product_state_info_create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: purchase_compute_order_product_filter
+#: model:ir.model.fields,field_description:purchase_compute_order_product_filter.field_product_state_info_display_name
+msgid "Display Name"
+msgstr "Nombre a Mostrar"
+
+#. module: purchase_compute_order_product_filter
+#: model:product.state.info,name:purchase_compute_order_product_filter.product_state_end
+msgid "End of Lifecycle"
+msgstr "Fin del ciclo de vida"
+
+#. module: purchase_compute_order_product_filter
+#: model:ir.model.fields,field_description:purchase_compute_order_product_filter.field_computed_purchase_order_filter_by_product_category
+msgid "Filter by product Category"
+msgstr "Filtrar por categorías de producto"
+
+#. module: purchase_compute_order_product_filter
+#: model:ir.model.fields,field_description:purchase_compute_order_product_filter.field_computed_purchase_order_filter_by_product_state
+msgid "Filter by product state"
+msgstr "Filtrar por estado de producto"
+
+#. module: purchase_compute_order_product_filter
+#: model:ir.model.fields,field_description:purchase_compute_order_product_filter.field_product_state_info_id
+msgid "ID"
+msgstr "ID"
+
+#. module: purchase_compute_order_product_filter
+#: model:ir.model.fields,field_description:purchase_compute_order_product_filter.field_product_state_info___last_update
+msgid "Last Modified on"
+msgstr "Última Modificación en"
+
+#. module: purchase_compute_order_product_filter
+#: model:ir.model.fields,field_description:purchase_compute_order_product_filter.field_product_state_info_write_uid
+msgid "Last Updated by"
+msgstr "Última Actualización por"
+
+#. module: purchase_compute_order_product_filter
+#: model:ir.model.fields,field_description:purchase_compute_order_product_filter.field_product_state_info_write_date
+msgid "Last Updated on"
+msgstr "Última Actualización el"
+
+#. module: purchase_compute_order_product_filter
+#: model:product.state.info,name:purchase_compute_order_product_filter.product_state_draft
+msgid "New"
+msgstr "Nuevo"
+
+#. module: purchase_compute_order_product_filter
+#: model:product.state.info,name:purchase_compute_order_product_filter.product_state_sellable
+msgid "Normal"
+msgstr "Normal"
+
+#. module: purchase_compute_order_product_filter
+#: model:product.state.info,name:purchase_compute_order_product_filter.product_state_obsolete
+msgid "Obsolete"
+msgstr "Obsoleto"
+
+#. module: purchase_compute_order_product_filter
+#: model:ir.model.fields,field_description:purchase_compute_order_product_filter.field_computed_purchase_order_product_category_ids
+msgid "Product Category"
+msgstr "Categorías de producto"
+
+#. module: purchase_compute_order_product_filter
+#: model:ir.model.fields,field_description:purchase_compute_order_product_filter.field_computed_purchase_order_product_state_ids
+msgid "Product State"
+msgstr "Estado de producto"
+
+#. module: purchase_compute_order_product_filter
+#: model:ir.model.fields,field_description:purchase_compute_order_product_filter.field_product_state_info_name
+msgid "State"
+msgstr "Estado"
+
+#. module: purchase_compute_order_product_filter
+#: model:ir.model.fields,field_description:purchase_compute_order_product_filter.field_product_state_info_code
+msgid "State Code"
+msgstr "Código de estado"
+
+#. module: purchase_compute_order_product_filter
+#: model:ir.model,name:purchase_compute_order_product_filter.model_product_state_info
+msgid "product.state.info"
+msgstr "product.state.info"

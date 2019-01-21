@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- © 2016 Hugo Santos <hugo.santos@factorlibre.com>
+     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html). -->
+<openerp>
+  <data>
+    <record id="view_computed_purchase_order_form" model="ir.ui.view">
+        <field name="name">computed.purchase.order.form</field>
+        <field name="model">computed.purchase.order</field>
+        <field name="inherit_id"
+            ref="purchase_compute_order.view_computed_purchase_order_form"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="filter_by_product_category"/>
+                <field name="product_category_ids" attrs="{'invisible': [('filter_by_product_category', '=', False)]}"/>
+                <field name="filter_by_product_state"/>
+                <field name="product_state_ids" attrs="{'invisible': [('filter_by_product_state', '=', False)]}"
+                    widget="many2many_tags" options="{'no_create': True}"/>
+            </field>
+        </field>
+    </record>
+  </data>
+</openerp>

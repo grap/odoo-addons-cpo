@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- © 2016 Hugo Santos <hugo.santos@factorlibre.com>
+     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html). -->
+<openerp>
+  <data>
+    <record id="view_computed_purchase_order_form" model="ir.ui.view">
+        <field name="name">computed.purchase.order.form</field>
+        <field name="model">computed.purchase.order</field>
+        <field name="inherit_id"
+            ref="purchase_compute_order_product_filter.view_computed_purchase_order_form"/>
+        <field name="arch" type="xml">
+            <field name="product_state_ids" position="after">
+                <field name="product_season"/>
+            </field>
+        </field>
+    </record>
+  </data>
+</openerp>
