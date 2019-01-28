@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- © 2018 FactorLibre - Álvaro Marcos <alvaro.marcos@factorlibre.com>
+License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html). -->
+<openerp>
+  <data>
+      <record id="consumption_rules_tree_view" model="ir.ui.view">
+        <field name="name">consumption.rules.tree</field>
+        <field name="model">consumption.rules</field>
+        <field name="arch" type="xml">
+            <tree string="Consumption Rules">
+                <field name="initial_date"/>
+                <field name="end_date"/>
+                <field name="apply_to_calculation"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="consumption_rules_form_view" model="ir.ui.view">
+        <field name="name">consumption.rules.form</field>
+        <field name="model">consumption.rules</field>
+        <field name="arch" type="xml">
+            <form string="Consumption Rules">
+                <sheet>
+                    <group>
+                        <field name="initial_date"/>
+                        <field name="end_date"/>
+                        <field name="added_locations"/>
+                        <field name="apply_to_calculation"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="consumption_rules_action" model="ir.actions.act_window">
+        <field name="name">Consumption Rules</field>
+        <field name="res_model">consumption.rules</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_type">form</field>
+        <field name="view_id" ref="consumption_rules_tree_view"/>
+    </record>
+
+    <menuitem id="consumption_rules_menu"
+        name="Consumption Rules"
+        parent="sale.menu_sale_config"
+        action="consumption_rules_action"
+        sequence="20"/>
+  </data>
+</openerp>
