@@ -1,5 +1,5 @@
 {
-    'name': 'Purchase Order Strectch',
+    'name': 'Purchase Order Stretch',
     'version': '11.0.1.0.0',
     'category': 'Purchase',
     'author': 'FactorLibre',
@@ -10,6 +10,6 @@
         'purchase_compute_order'
     ],
     'data': [
-        "views/purchase_order.xml"
+        "views/purchase_order.xml",
     ],
 }

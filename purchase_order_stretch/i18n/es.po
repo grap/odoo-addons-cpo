@@ -1,0 +1,58 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* purchase_order_stretch
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 11.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-01-31 15:20+0000\n"
+"PO-Revision-Date: 2019-01-31 16:22+0100\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: es\n"
+"X-Generator: Poedit 1.8.7.1\n"
+
+#. module: purchase_order_stretch
+#: model:ir.model,name:purchase_order_stretch.model_computed_purchase_order
+msgid "Computed Purchase Order"
+msgstr "Pedido calculado"
+
+#. module: purchase_order_stretch
+#: model:ir.model,name:purchase_order_stretch.model_computed_purchase_order_line
+msgid "Computed Purchase Order Line"
+msgstr "Líneas de pedido calculadas"
+
+#. module: purchase_order_stretch
+#: model:ir.model,name:purchase_order_stretch.model_product_supplierinfo
+msgid "Information about a product vendor"
+msgstr "Información acerca del proveedor de un producto"
+
+#. module: purchase_order_stretch
+#: model:ir.model.fields,field_description:purchase_order_stretch.field_purchase_order_line_product_tmpl_id
+msgid "Plantilla"
+msgstr "Plantilla"
+
+#. module: purchase_order_stretch
+#: model:ir.model.fields,field_description:purchase_order_stretch.field_purchase_order_line_supplier_id
+msgid "Proveedor"
+msgstr "Proveedor"
+
+#. module: purchase_order_stretch
+#: model:ir.model,name:purchase_order_stretch.model_purchase_order
+msgid "Purchase Order"
+msgstr "Pedido de compra"
+
+#. module: purchase_order_stretch
+#: model:ir.model,name:purchase_order_stretch.model_purchase_order_line
+msgid "Purchase Order Line"
+msgstr "Línea de pedido de compra"
+
+#. module: purchase_order_stretch
+#: model:ir.model.fields,field_description:purchase_order_stretch.field_computed_purchase_order_line_supplier_multiple
+msgid "Supplier Multiple"
+msgstr "Múltiplo de cantidades"
