@@ -133,8 +133,7 @@ class ComputedPurchaseOrderLine(models.Model):
         psi = self.env['product.supplierinfo'].search([
             ('name', '=', cpo_partner_id),
             ('product_tmpl_id', '=', product_tmpl_id),
-            ('min_qty', '<=', self.purchase_qty)
-        ], order='price', limit=1)
+        ], order='sequence', limit=1)
         return psi
 
     @api.multi
@@ -180,10 +179,10 @@ class ComputedPurchaseOrderLine(models.Model):
                     # if psi.price and purchase_qty >= psi.min_qty:
                     #     unit_price = psi.price
                     # else:
-                    if psi.price and cpol.purchase_qty >= psi.min_qty:
-                        unit_price = psi.price
-                    else:
-                        unit_price = psi.product_tmpl_id.standard_price
+                    # if psi.price and cpol.purchase_qty >= psi.min_qty:
+                    unit_price = psi.price or psi.product_tmpl_id.standard_price
+                    # else:
+                    #     unit_price = psi.product_tmpl_id.standard_price
             if cpo_product_price == 'last_purchase':
                 purch_line_price = pool_purchase_line.search([
                     ('product_id', '=', cpol.product_id.id)
@@ -286,6 +285,7 @@ class ComputedPurchaseOrderLine(models.Model):
             if cpo:
                 # Check if the product is already in the list.
                 products = [x.product_id.id for x in cpo.line_ids]
+                import pdb; pdb.set_trace()
                 if pp.id in products:
                     raise exceptions.Warning(
                         _('This product is already in the list!'))
