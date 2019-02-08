@@ -12,6 +12,9 @@ class ComputedPurchaseOrderLine(models.Model):
     @api.multi
     def _get_discount(self):
         for cpol in self:
-            psi = cpol._line_product_supplier_info()
-            # if psi and psi.price and cpol.purchase_qty >= psi.min_qty:
-            cpol.discount = psi.discount
+            if cpol.supplier:
+                cpol.discount = cpol.supplier.discount
+            else:
+                psi = cpol._line_product_supplier_info()
+                # if psi and psi.price and cpol.purchase_qty >= psi.min_qty:
+                cpol.discount = psi.discount

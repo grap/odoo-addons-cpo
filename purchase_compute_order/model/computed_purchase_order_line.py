@@ -117,6 +117,7 @@ class ComputedPurchaseOrderLine(models.Model):
         help="The sum of all quantities selected.",
         digits_compute=dp.get_precision('Product UoM'))
     supplier = fields.Many2one('product.supplierinfo', 'Supplier')
+    temp_value = fields.Float("Temporal value")
 
     # Constraints section
     _sql_constraints = [
@@ -167,7 +168,6 @@ class ComputedPurchaseOrderLine(models.Model):
             unit_price = cpol.product_price
             cpo_product_price = cpol.computed_purchase_order_id.product_price
             cpo_partner_id = cpol.computed_purchase_order_id.partner_id.id
-
             if pricelist:
                 psi = cpol._line_product_supplier_info()
                 if psi:
@@ -180,7 +180,8 @@ class ComputedPurchaseOrderLine(models.Model):
                     #     unit_price = psi.price
                     # else:
                     # if psi.price and cpol.purchase_qty >= psi.min_qty:
-                    unit_price = psi.price or psi.product_tmpl_id.standard_price
+                    unit_price =\
+                        psi.price or psi.product_tmpl_id.standard_price
                     # else:
                     #     unit_price = psi.product_tmpl_id.standard_price
             if cpo_product_price == 'last_purchase':
@@ -220,7 +221,8 @@ class ComputedPurchaseOrderLine(models.Model):
                     cpol.product_price_inv = cpol._product_price_based_on(True)
                     cpol.supplier = psi
                     cpol.package_quantity_inv = (
-                        hasattr(psi, 'package_qty') and psi.package_qty or 1.0)
+                        hasattr(psi,
+                                'qty_multiple') and psi.qty_multiple or 1.0)
 
     @api.multi
     def _set_product_code(self):
@@ -284,11 +286,10 @@ class ComputedPurchaseOrderLine(models.Model):
             cpo = self.computed_purchase_order_id
             if cpo:
                 # Check if the product is already in the list.
-                products = [x.product_id.id for x in cpo.line_ids]
-                import pdb; pdb.set_trace()
-                if pp.id in products:
-                    raise exceptions.Warning(
-                        _('This product is already in the list!'))
+                # products = [x.product_id.id for x in cpo.line_ids]
+                # if products:
+                #     raise exceptions.Warning(
+                #         _('This product is already in the list!'))
 
                 if cpo.compute_pending_quantity:
                     computed_qty += pp.incoming_qty + pp.outgoing_qty
@@ -302,7 +303,7 @@ class ComputedPurchaseOrderLine(models.Model):
             self.draft_incoming_qty = pp.draft_incoming_qty
             self.draft_outgoing_qty = pp.draft_outgoing_qty
             self.computed_qty = computed_qty
-            self.weight_net = pp.weight_net
+            # self.weight_net = pp.weight_net
             self.uom_po_id = pp.uom_id.id
             self.product_price_inv = 0
             self.package_quantity_inv = 0
@@ -320,7 +321,8 @@ class ComputedPurchaseOrderLine(models.Model):
                     #     psi.pricelist_ids and
                     #     psi.pricelist_ids[0].price or 0)
                     self.product_price_inv = 0
-                    self.package_quantity_inv = psi.package_qty
+                    self.package_quantity_inv =\
+                        (hasattr(psi, 'qty_multiple') and psi.qty_multiple)
                     self.uom_po_id = psi.product_uom.id
                     self.state = 'up_to_date'
 
