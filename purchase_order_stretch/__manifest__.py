@@ -7,7 +7,8 @@
     'depends': [
         'purchase',
         'product',
-        'purchase_compute_order'
+        'purchase_compute_order',
+        'purchase_compute_order_discount',
     ],
     'data': [
         "views/purchase_order.xml",

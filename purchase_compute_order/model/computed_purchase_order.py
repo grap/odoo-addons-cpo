@@ -26,6 +26,7 @@ import logging
 from math import ceil
 from openerp import models, fields, api, _, exceptions
 import openerp.addons.decimal_precision as dp
+from openerp.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -270,8 +271,11 @@ class ComputedPurchaseOrder(models.Model):
     @api.multi
     def _compute_purchase_quantities_days(self):
         self.ensure_one()
+        psi_env = self.env['product.supplierinfo']
         days = self.purchase_target
         for line in self.line_ids:
+            package_quantity = 1
+            temp_value = 0
             if line.average_consumption:
                 quantity = max(
                     days * line.average_consumption * line.uom_po_id.factor /
@@ -280,18 +284,47 @@ class ComputedPurchaseOrder(models.Model):
                     quantity_growth_factor = (
                         quantity * self.growth_factor / 100)
                     quantity = quantity + round(quantity_growth_factor)
-                if line.package_quantity and quantity % line.package_quantity:
-                    quantity = ceil(quantity / line.package_quantity)\
-                        * line.package_quantity
+                # if (hasattr(line.supplier,
+                #             'qty_multiple') and line.supplier.qty_multiple):
+                #     package_quantity = line.supplier.qty_multiple
+                #     temp_value = quantity
+                #     resto = quantity % package_quantity
+                #     quantity = quantity + package_quantity - resto
             else:
-                quantity = 0
-            line.write({'purchase_qty': quantity})
+                quantity = -line.computed_qty
+            if hasattr(psi_env, 'discount'):
+                psi = psi_env.search([
+                    ('name', '=', self.partner_id.id),
+                    ('product_tmpl_id', '=',
+                     line.product_id.product_tmpl_id.id),
+                    ('min_qty', '<=', quantity)
+                ], order='price, discount desc', limit=1)
+            else:
+                psi = psi_env.search([
+                    ('name', '=', self.partner_id.id),
+                    ('product_tmpl_id', '=',
+                     line.product_id.product_tmpl_id.id),
+                    ('min_qty', '<=', quantity)
+                ], order='price', limit=1)
+            if psi:
+                package_quantity = hasattr(
+                    line.supplier,
+                    'qty_multiple') and psi.qty_multiple or 1
+                temp_value = quantity
+                resto = quantity % package_quantity
+                if resto:
+                    quantity = quantity + package_quantity - resto
+            line.write({'purchase_qty': quantity,
+                        'temp_value': temp_value,
+                        'supplier': psi.id}
+                       )
         return True
 
     @api.multi
     def _compute_purchase_quantities_other(self, field=None):
         self.ensure_one()
         cpo = self
+        psi_env = self.env['product.supplierinfo']
         if not cpo.line_ids:
             return False
         target = cpo.purchase_target
@@ -301,29 +334,54 @@ class ComputedPurchaseOrder(models.Model):
         field_list_dict = {}
         for i in field_list:
             field_list_dict[i['id']] = i[field]
-
         while not ok:
             days += 1
             qty_tmp = {}
             for line in cpo.line_ids:
+                package_quantity = 1
+                temp_value = 0
+                quantity = 0
                 if line.average_consumption:
                     quantity = max(
                         days * line.average_consumption *
                         line.uom_po_id.factor / line.uom_id.factor -
                         line.computed_qty, 0)
-                    if line.package_quantity and \
-                            (quantity % line.package_quantity):
-                        quantity = ceil(quantity / line.package_quantity)\
-                            * line.package_quantity
+                    if quantity == 0 and line.computed_qty < 0:
+                        quantity = line.computed_qty * -1
+                elif line.computed_qty < 0:
+                    quantity = line.computed_qty * -1
+                if hasattr(psi_env, 'discount'):
+                    psi = psi_env.search([
+                        ('name', '=', self.partner_id.id),
+                        ('product_tmpl_id', '=',
+                         line.product_id.product_tmpl_id.id),
+                        ('min_qty', '<=', quantity)
+                    ], order='price, discount desc', limit=1)
                 else:
-                    quantity = line.package_quantity or 0
-                qty_tmp[line.id] = quantity
+                    psi = psi_env.search([
+                        ('name', '=', self.partner_id.id),
+                        ('product_tmpl_id', '=',
+                         line.product_id.product_tmpl_id.id),
+                        ('min_qty', '<=', quantity)
+                    ], order='price', limit=1)
+                if psi:
+                    package_quantity = hasattr(
+                        line.supplier,
+                        'qty_multiple') and psi.qty_multiple or 1
+                    temp_value = quantity
+                    resto = quantity % package_quantity
+                    if resto:
+                        quantity = quantity + package_quantity - resto
+                qty_tmp[line.id] = [quantity, temp_value, psi]
 
             ok = self._check_purchase_qty(
                 target, field_list_dict, qty_tmp)
 
         for line in cpo.line_ids:
-            line.write({'purchase_qty': qty_tmp[line.id]})
+            line.write({'purchase_qty': qty_tmp[line.id][0],
+                        'temp_value': qty_tmp[line.id][1],
+                        'supplier': qty_tmp[line.id][2].id}
+                       )
         return True
 
     @api.model
@@ -345,6 +403,8 @@ class ComputedPurchaseOrder(models.Model):
     @api.multi
     def _active_product_stock_product_domain(self, psi_ids):
         self.ensure_one()
+        if not psi_ids:
+            raise ValidationError("No hay productos con ese proveedor")
         self.env.cr.execute("""
             SELECT product_tmpl_id
             FROM product_supplierinfo
@@ -395,8 +455,8 @@ class ComputedPurchaseOrder(models.Model):
                         'product_code': psi and psi[0].product_code,
                         'product_name': psi and psi[0].product_name,
                         'package_quantity': psi and (
-                            (hasattr(psi[0], 'package_qty') and
-                             psi[0].package_qty)) or 1.0,
+                             (hasattr(psi[0], 'qty_multiple') and
+                              psi[0].qty_multiple)) or 1.0,
                         # 'package_quantity': psi and (
                         #     (hasattr(psi[0], 'package_qty') and
                         #      psi[0].package_qty) or psi[0].min_qty) or 1.0,

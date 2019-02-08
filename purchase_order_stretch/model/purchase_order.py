@@ -13,19 +13,63 @@ class PurchaseOrderLine(models.Model):
             if line.product_id.product_tmpl_id:
                 line.product_tmpl_id = line.product_id.product_tmpl_id
 
-    supplier_id = fields.Many2one('product.supplierinfo', 'Proveedor')
+    supplier_id = fields.Many2one('product.supplierinfo', 'Proveedor',
+                                  readonly=True)
     product_tmpl_id = fields.Many2one('product.template', 'Plantilla',
                                       compute='_get_product_tmpl')
 
-    @api.onchange('supplier_id')
+    @api.multi
     def onchange_supplier(self):
+        package_quantity = 1
+        temp_value = 0
+        quantity = self.product_qty
+        psi = self.env['product.supplierinfo'].search([
+            ('name', '=', self.partner_id.id),
+            ('product_tmpl_id', '=',
+             self.product_id.product_tmpl_id.id),
+            ('min_qty', '<=', quantity)
+        ], order='price, discount desc', limit=1)
+        if psi:
+            package_quantity = hasattr(
+                self.supplier_id,
+                'qty_multiple') and psi.qty_multiple or 1
+            resto = quantity % package_quantity
+            temp_value = quantity
+            if resto:
+                quantity = quantity + package_quantity - resto
+            # Pasa otra vez para recomprobar el proveedor
+
+            psi = self.env['product.supplierinfo'].search([
+                ('name', '=', self.partner_id.id),
+                ('product_tmpl_id', '=',
+                 self.product_id.product_tmpl_id.id),
+                ('min_qty', '<=', quantity)
+            ], order='price, discount desc', limit=1)
+            package_quantity = hasattr(
+                self.supplier_id,
+                'qty_multiple') and psi.qty_multiple or 1
+            resto = temp_value % package_quantity
+            # temp_value = quantity
+            if resto:
+                quantity = temp_value + package_quantity - resto
+        else:
+            psi = self.env['product.supplierinfo'].search([
+                ('name', '=', self.partner_id.id),
+                ('product_tmpl_id', '=',
+                 self.product_id.product_tmpl_id.id),
+            ], order='min_qty, price, discount desc', limit=1)
+            if psi:
+                quantity = psi.min_qty
+            else:
+                quantity = 0
         data_dict = {
-            'name': self.supplier_id.product_name or self.product_id.name,
-            'product_qty': self.supplier_id.min_qty,
-            'price_unit': self.supplier_id.price,
-            'discount': self.supplier_id.discount,
+            'name': psi.product_name or self.product_id.name,
+            'product_qty': quantity,
+            'price_unit': psi.price or 0,
+            'discount': psi.discount or 0,
         }
         self.update(data_dict)
+        self.supplier_id = psi
 
     @api.multi
     def update_line(self, supplier):
@@ -60,6 +104,11 @@ class PurchaseOrderLine(models.Model):
             # product = line.product_id
             # line.name = "[%s] %s" % (product.default_code, product.name)
             line._get_product_tmpl()
+
+    @api.onchange('product_qty')
+    def onchange_product_qty(self):
+        for line in self:
+            line.onchange_supplier()
 
 
 class PurchaseOrder(models.Model):
