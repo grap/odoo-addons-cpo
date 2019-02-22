@@ -10,6 +10,7 @@
     'license': 'AGPL-3',
     'website': 'http://www.factorlibre.com',
     'data': [
+        'security/ir.model.access.csv',
         'view/consumption_rules.xml'
     ],
     'installable': True,
