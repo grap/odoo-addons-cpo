@@ -61,13 +61,21 @@ class PurchaseOrderLine(models.Model):
             if psi:
                 quantity = psi.min_qty
             else:
-                quantity = 0
-        data_dict = {
-            'name': psi.product_name or self.product_id.name,
-            'product_qty': quantity,
-            'price_unit': psi.price or 0,
-            'discount': psi.discount or 0,
-        }
+                quantity = self.product_qty
+        if psi:
+            data_dict = {
+                'name': psi.product_name or self.product_id.name,
+                'product_qty': quantity,
+                'price_unit': psi.price or 0,
+                'discount': psi.discount or 0,
+            }
+        else:
+            data_dict = {
+                'name': self.product_id.name,
+                'product_qty': quantity,
+                'price_unit': self.product_id.standard_price or 0,
+                'discount': 0,
+            }
         self.update(data_dict)
         self.supplier_id = psi
 
