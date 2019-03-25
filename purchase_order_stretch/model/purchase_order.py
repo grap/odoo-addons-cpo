@@ -7,6 +7,8 @@ from odoo.exceptions import ValidationError
 class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
+    calculate_qty_line = fields.Boolean("Calculate quantities", default=True)
+
     @api.multi
     def _get_product_tmpl(self):
         for line in self:
@@ -20,61 +22,74 @@ class PurchaseOrderLine(models.Model):
 
     @api.multi
     def onchange_supplier(self):
-        package_quantity = 1
-        temp_value = 0
-        quantity = self.product_qty
-        psi = self.env['product.supplierinfo'].search([
-            ('name', '=', self.partner_id.id),
-            ('product_tmpl_id', '=',
-             self.product_id.product_tmpl_id.id),
-            ('min_qty', '<=', quantity)
-        ], order='price, discount desc', limit=1)
-        if psi:
-            package_quantity = hasattr(
-                self.supplier_id,
-                'qty_multiple') and psi.qty_multiple or 1
-            resto = quantity % package_quantity
-            temp_value = quantity
-            if resto:
-                quantity = quantity + package_quantity - resto
-            # Pasa otra vez para recomprobar el proveedor
-
+        psi = False
+        if self.calculate_qty_line:
+            package_quantity = 1
+            temp_value = 0
+            quantity = self.product_qty
             psi = self.env['product.supplierinfo'].search([
                 ('name', '=', self.partner_id.id),
                 ('product_tmpl_id', '=',
                  self.product_id.product_tmpl_id.id),
                 ('min_qty', '<=', quantity)
             ], order='price, discount desc', limit=1)
-            package_quantity = hasattr(
-                self.supplier_id,
-                'qty_multiple') and psi.qty_multiple or 1
-            resto = temp_value % package_quantity
-            # temp_value = quantity
-            if resto:
-                quantity = temp_value + package_quantity - resto
+            if psi:
+                package_quantity = hasattr(
+                    self.supplier_id,
+                    'qty_multiple') and psi.qty_multiple or 1
+                resto = quantity % package_quantity
+                temp_value = quantity
+                if resto:
+                    quantity = quantity + package_quantity - resto
+                # Pasa otra vez para recomprobar el proveedor
+
+                psi = self.env['product.supplierinfo'].search([
+                    ('name', '=', self.partner_id.id),
+                    ('product_tmpl_id', '=',
+                     self.product_id.product_tmpl_id.id),
+                    ('min_qty', '<=', quantity)
+                ], order='price, discount desc', limit=1)
+                package_quantity = hasattr(
+                    self.supplier_id,
+                    'qty_multiple') and psi.qty_multiple or 1
+                resto = temp_value % package_quantity
+                # temp_value = quantity
+                if resto:
+                    quantity = temp_value + package_quantity - resto
+            else:
+                psi = self.env['product.supplierinfo'].search([
+                    ('name', '=', self.partner_id.id),
+                    ('product_tmpl_id', '=',
+                     self.product_id.product_tmpl_id.id),
+                ], order='min_qty, price, discount desc', limit=1)
+                if psi:
+                    quantity = psi.min_qty
+                else:
+                    quantity = self.product_qty
+            if psi:
+                data_dict = {
+                    'name': psi.product_name or self.product_id.name,
+                    'product_qty': quantity,
+                    'price_unit': psi.price or 0,
+                    'discount': psi.discount or 0,
+                }
+            else:
+                data_dict = {
+                    'name': self.product_id.name,
+                    'product_qty': quantity,
+                    'price_unit': self.product_id.standard_price or 0,
+                    'discount': 0,
+                }
         else:
             psi = self.env['product.supplierinfo'].search([
                 ('name', '=', self.partner_id.id),
                 ('product_tmpl_id', '=',
                  self.product_id.product_tmpl_id.id),
-            ], order='min_qty, price, discount desc', limit=1)
-            if psi:
-                quantity = psi.min_qty
-            else:
-                quantity = self.product_qty
-        if psi:
+            ], order='price, discount', limit=1)
             data_dict = {
                 'name': psi.product_name or self.product_id.name,
-                'product_qty': quantity,
-                'price_unit': psi.price or 0,
+                'price_unit': psi.price or self.product_id.standard_price or 0,
                 'discount': psi.discount or 0,
-            }
-        else:
-            data_dict = {
-                'name': self.product_id.name,
-                'product_qty': quantity,
-                'price_unit': self.product_id.standard_price or 0,
-                'discount': 0,
             }
         self.update(data_dict)
         self.supplier_id = psi
@@ -93,25 +108,26 @@ class PurchaseOrderLine(models.Model):
     @api.onchange('product_id')
     def onchange_product_id_supp(self):
         for line in self:
-            if len(line.order_id.order_line.filtered(
-                    lambda r: r.product_id == line.product_id)) > 2:
-                raise ValidationError((
-                    "Ya hay una línea para este producto"))
-            if line.product_id.product_tmpl_id.id:
-                psi = self.env['product.supplierinfo'].search([
-                    ('name', '=', line.order_id.partner_id.id),
-                    ('product_tmpl_id', '=',
-                     line.product_id.product_tmpl_id.id),
-                ], order='sequence', limit=1)
-                if psi:
-                    line.supplier_id = psi
+            if line.order_id.calculate_qty_line:
+                if len(line.order_id.order_line.filtered(
+                        lambda r: r.product_id == line.product_id)) > 2:
+                    raise ValidationError((
+                        "Ya hay una línea para este producto"))
+                if line.product_id.product_tmpl_id.id:
+                    psi = self.env['product.supplierinfo'].search([
+                        ('name', '=', line.order_id.partner_id.id),
+                        ('product_tmpl_id', '=',
+                         line.product_id.product_tmpl_id.id),
+                    ], order='sequence', limit=1)
+                    if psi:
+                        line.supplier_id = psi
+                    else:
+                        line.supplier_id = False
                 else:
                     line.supplier_id = False
-            else:
-                line.supplier_id = False
-            # product = line.product_id
-            # line.name = "[%s] %s" % (product.default_code, product.name)
-            line._get_product_tmpl()
+                # product = line.product_id
+                # line.name = "[%s] %s" % (product.default_code, product.name)
+                line._get_product_tmpl()
 
     @api.onchange('product_qty')
     def onchange_product_qty(self):
@@ -121,6 +137,8 @@ class PurchaseOrderLine(models.Model):
 
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
+
+    calculate_qty = fields.Boolean("Calculate quantities", default=True)
 
     @api.onchange('partner_id')
     def onchange_partner(self):
@@ -139,10 +157,18 @@ class PurchaseOrder(models.Model):
                         line.supplier_id = False
                 else:
                     line.supplier_id = False
-                # product = line.product_id
-                # line.name = "[%s] %s" % (product.default_code, product.name)
                 line._get_product_tmpl()
                 line.update_line(psi)
+
+    @api.onchange('calculate_qty')
+    def _on_change_calculate_qty(self):
+        for order in self:
+            for line in order.order_line:
+                line.update({
+                    'calculate_qty_line': order.calculate_qty
+                })
+                if order.calculate_qty:
+                    line.onchange_supplier()
 
 
 class ProductSupplierinfo(models.Model):

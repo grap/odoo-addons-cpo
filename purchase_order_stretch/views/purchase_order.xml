@@ -6,10 +6,17 @@
             <field name="model">purchase.order</field>
             <field name="inherit_id" ref="purchase.purchase_order_form"/>
             <field name="arch" type="xml">
+                <xpath expr="//field[@name='partner_ref']" position="after">
+                    <field name="calculate_qty"/>
+                </xpath>
                 <xpath expr="//field[@name='product_id']" position="after">
                     <field name="supplier_id" domain ="[('name', '=', partner_id),('product_tmpl_id', '=', product_tmpl_id)]"/>
                     <field name="partner_id" invisible="1"/>
                     <field name="product_tmpl_id" invisible="1"/>
+                    <field name="calculate_qty_line" invisible="1"/>
+                </xpath>
+                <xpath expr="//group/group/field[@name='date_planned']" position="after">
+                    <field name="calculate_qty_line"/>
                 </xpath>
             </field>
         </record>
