@@ -108,7 +108,7 @@ class PurchaseOrderLine(models.Model):
     @api.onchange('product_id')
     def onchange_product_id_supp(self):
         for line in self:
-            if line.order_id.calculate_qty_line:
+            if line.calculate_qty_line:
                 if len(line.order_id.order_line.filtered(
                         lambda r: r.product_id == line.product_id)) > 2:
                     raise ValidationError((
