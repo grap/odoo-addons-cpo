@@ -15,8 +15,7 @@ class PurchaseOrderLine(models.Model):
             if line.product_id.product_tmpl_id:
                 line.product_tmpl_id = line.product_id.product_tmpl_id
 
-    supplier_id = fields.Many2one('product.supplierinfo', 'Proveedor',
-                                  readonly=True)
+    supplier_id = fields.Many2one('product.supplierinfo', 'Proveedor')
     product_tmpl_id = fields.Many2one('product.template', 'Plantilla',
                                       compute='_get_product_tmpl')
 
@@ -176,5 +175,5 @@ class ProductSupplierinfo(models.Model):
 
     @api.multi
     def name_get(self):
-        return [(s.id, "%s - %s" % (s.name.name, s.product_name))
+        return [(s.id, "%s - %s" % (s.name.name, s.product_name or ""))
                 for s in self]
