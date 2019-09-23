@@ -2,6 +2,7 @@
 # © 2018 FactorLibre - Álvaro Marcos <alvaro.marcos@factorlibre.com>
 from openerp import models, fields, api
 from odoo.exceptions import ValidationError
+from datetime import datetime
 
 
 class PurchaseOrderLine(models.Model):
@@ -22,6 +23,7 @@ class PurchaseOrderLine(models.Model):
     @api.multi
     def onchange_supplier(self):
         psi = False
+        now = datetime.today()
         if self.calculate_qty_line:
             package_quantity = 1
             temp_value = 0
@@ -30,7 +32,11 @@ class PurchaseOrderLine(models.Model):
                 ('name', '=', self.partner_id.id),
                 ('product_tmpl_id', '=',
                  self.product_id.product_tmpl_id.id),
-                ('min_qty', '<=', quantity)
+                ('min_qty', '<=', quantity),
+                '|', ('date_start', '=', False),
+                ('date_start', '<=', now),
+                '|', ('date_end', '=', False),
+                ('date_end', '>=', now)
             ], order='price, discount desc', limit=1)
             if psi:
                 package_quantity = hasattr(
@@ -46,7 +52,11 @@ class PurchaseOrderLine(models.Model):
                     ('name', '=', self.partner_id.id),
                     ('product_tmpl_id', '=',
                      self.product_id.product_tmpl_id.id),
-                    ('min_qty', '<=', quantity)
+                    ('min_qty', '<=', quantity),
+                    '|', ('date_start', '=', False),
+                    ('date_start', '<=', now),
+                    '|', ('date_end', '=', False),
+                    ('date_end', '>=', now)
                 ], order='price, discount desc', limit=1)
                 package_quantity = hasattr(
                     self.supplier_id,
@@ -60,6 +70,10 @@ class PurchaseOrderLine(models.Model):
                     ('name', '=', self.partner_id.id),
                     ('product_tmpl_id', '=',
                      self.product_id.product_tmpl_id.id),
+                    '|', ('date_start', '=', False),
+                    ('date_start', '<=', now),
+                    '|', ('date_end', '=', False),
+                    ('date_end', '>=', now)
                 ], order='min_qty, price, discount desc', limit=1)
                 if psi:
                     quantity = psi.min_qty
@@ -84,6 +98,10 @@ class PurchaseOrderLine(models.Model):
                 ('name', '=', self.partner_id.id),
                 ('product_tmpl_id', '=',
                  self.product_id.product_tmpl_id.id),
+                '|', ('date_start', '=', False),
+                ('date_start', '<=', now),
+                '|', ('date_end', '=', False),
+                ('date_end', '>=', now)
             ], order='price, discount', limit=1)
             data_dict = {
                 'name': psi.product_name or self.product_id.name,
@@ -106,6 +124,7 @@ class PurchaseOrderLine(models.Model):
 
     @api.onchange('product_id')
     def onchange_product_id_supp(self):
+        now = datetime.today()
         for line in self:
             if line.calculate_qty_line:
                 if len(line.order_id.order_line.filtered(
@@ -117,6 +136,10 @@ class PurchaseOrderLine(models.Model):
                         ('name', '=', line.order_id.partner_id.id),
                         ('product_tmpl_id', '=',
                          line.product_id.product_tmpl_id.id),
+                        '|', ('date_start', '=', False),
+                        ('date_start', '<=', now),
+                        '|', ('date_end', '=', False),
+                        ('date_end', '>=', now)
                     ], order='sequence', limit=1)
                     if psi:
                         line.supplier_id = psi
@@ -141,6 +164,7 @@ class PurchaseOrder(models.Model):
 
     @api.onchange('partner_id')
     def onchange_partner(self):
+        now = datetime.today()
         for order in self:
             for line in order.order_line:
                 psi = False
@@ -149,6 +173,10 @@ class PurchaseOrder(models.Model):
                         ('name', '=', line.order_id.partner_id.id),
                         ('product_tmpl_id', '=',
                          line.product_id.product_tmpl_id.id),
+                        '|', ('date_start', '=', False),
+                        ('date_start', '<=', now),
+                        '|', ('date_end', '=', False),
+                        ('date_end', '>=', now)
                     ], order='sequence', limit=1)
                     if psi:
                         line.supplier_id = psi

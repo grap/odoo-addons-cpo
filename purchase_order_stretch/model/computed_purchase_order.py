@@ -46,12 +46,17 @@ class ComputedPurchaseOrderLine(models.Model):
     @api.multi
     def _line_product_supplier_info(self):
         self.ensure_one()
+        now = datetime.today()
         cpo_partner_id = self.computed_purchase_order_id.partner_id.id
         product_tmpl_id = self.product_id.product_tmpl_id.id
         psi = self.env['product.supplierinfo'].search([
             ('name', '=', cpo_partner_id),
             ('product_tmpl_id', '=', product_tmpl_id),
             ('min_qty', '<=', self.purchase_qty)
+            '|', ('date_start', '=', False),
+            ('date_start', '<=', now),
+            '|', ('date_end', '=', False),
+            ('date_end', '>=', now)
         ], order='price, discount desc', limit=1)
         if not psi:
             return super(ComputedPurchaseOrderLine,
@@ -61,12 +66,17 @@ class ComputedPurchaseOrderLine(models.Model):
     @api.multi
     def _line_product_supplier_info_change(self, purchase_qty):
         self.ensure_one()
+        now = datetime.today()
         cpo_partner_id = self.computed_purchase_order_id.partner_id.id
         product_tmpl_id = self.product_id.product_tmpl_id.id
         psi = self.env['product.supplierinfo'].search([
             ('name', '=', cpo_partner_id),
             ('product_tmpl_id', '=', product_tmpl_id),
             ('min_qty', '<=', purchase_qty)
+            '|', ('date_start', '=', False),
+            ('date_start', '<=', now),
+            '|', ('date_end', '=', False),
+            ('date_end', '>=', now)
         ], order='price, discount desc', limit=1)
         return psi
 
