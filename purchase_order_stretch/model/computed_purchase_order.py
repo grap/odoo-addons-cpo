@@ -53,7 +53,7 @@ class ComputedPurchaseOrderLine(models.Model):
         psi = self.env['product.supplierinfo'].search([
             ('name', '=', cpo_partner_id),
             ('product_tmpl_id', '=', product_tmpl_id),
-            ('min_qty', '<=', self.purchase_qty)
+            ('min_qty', '<=', self.purchase_qty),
             '|', ('date_start', '=', False),
             ('date_start', '<=', now),
             '|', ('date_end', '=', False),
@@ -73,7 +73,7 @@ class ComputedPurchaseOrderLine(models.Model):
         psi = self.env['product.supplierinfo'].search([
             ('name', '=', cpo_partner_id),
             ('product_tmpl_id', '=', product_tmpl_id),
-            ('min_qty', '<=', purchase_qty)
+            ('min_qty', '<=', purchase_qty),
             '|', ('date_start', '=', False),
             ('date_start', '<=', now),
             '|', ('date_end', '=', False),
