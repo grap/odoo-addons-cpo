@@ -2,6 +2,7 @@
 # © 2018 FactorLibre - Álvaro Marcos <alvaro.marcos@factorlibre.com>
 from openerp import models, api, fields
 import openerp.addons.decimal_precision as dp
+from datetime import datetime
 
 
 class ComputedPurchaseOrder(models.Model):
