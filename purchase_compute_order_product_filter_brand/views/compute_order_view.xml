@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- © 2019 Rodrigo Bonilla <rodrigo.bonilla@factorlibre.com>
+     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html). -->
+<odoo>
+  <record id="view_computed_purchase_order_filter_brand_form" model="ir.ui.view">
+      <field name="name">computed.purchase.order.filter.brand.form</field>
+      <field name="model">computed.purchase.order</field>
+      <field name="inherit_id"
+          ref="purchase_compute_order_product_filter.view_computed_purchase_order_form"/>
+      <field name="arch" type="xml">
+          <field name="product_state_ids" position="after">
+              <field name="product_brand"/>
+          </field>
+      </field>
+  </record>
+</odoo>
