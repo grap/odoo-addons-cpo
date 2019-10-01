@@ -90,7 +90,7 @@ class ProductProduct(models.Model):
         super(ProductProduct, self)._get_draft_outgoing_qty()
         sol_obj = self.env['sale.order.line']
         sale_ids = self.env['sale.order'].search([
-            ('initial_order', '=', False)
+            ('initial_order', '=', True),
         ]).ids
         sol_ids = sol_obj.search([
             ('state', '=', 'draft'),
@@ -104,4 +104,4 @@ class ProductProduct(models.Model):
                 line.product_uom_qty / line.product_uom.factor\
                 * line.product_id.uom_id.factor
         for pp in self:
-            pp.draft_outgoing_qty += draft_qty.get(pp.id, 0)
+            pp.draft_outgoing_qty -= draft_qty.get(pp.id, 0)
