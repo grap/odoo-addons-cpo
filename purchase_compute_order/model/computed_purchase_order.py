@@ -373,7 +373,6 @@ class ComputedPurchaseOrder(models.Model):
                     if resto:
                         quantity = quantity + package_quantity - resto
                 qty_tmp[line.id] = [quantity, temp_value, psi]
-
             ok = self._check_purchase_qty(
                 target, field_list_dict, qty_tmp)
 
@@ -390,7 +389,7 @@ class ComputedPurchaseOrder(models.Model):
             return True
         total = 0
         for key in list(field_list.keys()):
-            total += field_list[key] * qty_tmp[key]
+            total += field_list[key] * qty_tmp[key][0]
         if total == 0.0 and total < target:
             raise exceptions.Warning(_(
                 'Total returned while computing purchase target is 0. '
