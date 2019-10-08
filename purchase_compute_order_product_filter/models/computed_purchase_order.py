@@ -33,7 +33,7 @@ class ComputedPurchaseOrder(models.Model):
             states = []
             for state in self.product_state_ids:
                 states.append(state.id)
-            product_domain.append(('tag_ids', 'in', states))
+            product_domain.append(('state', 'in', states))
         if self.product_category_ids and self.filter_by_product_category:
             categ_ids = self.product_category_ids.ids
             product_domain += [
