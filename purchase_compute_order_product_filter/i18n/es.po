@@ -74,8 +74,8 @@ msgstr "Última Actualización el"
 
 #. module: purchase_compute_order_product_filter
 #: model:product.state.info,name:purchase_compute_order_product_filter.product_state_draft
-msgid "New"
-msgstr "Nuevo"
+msgid "In Development"
+msgstr "En desarrollo"
 
 #. module: purchase_compute_order_product_filter
 #: model:product.state.info,name:purchase_compute_order_product_filter.product_state_sellable

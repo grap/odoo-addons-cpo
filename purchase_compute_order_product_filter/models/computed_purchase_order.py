@@ -32,7 +32,7 @@ class ComputedPurchaseOrder(models.Model):
                 product_domain.remove(('state', 'not in', ('end', 'obsolete')))
             states = []
             for state in self.product_state_ids:
-                states.append(state.id)
+                states.append(state.code)
             product_domain.append(('state', 'in', states))
         if self.product_category_ids and self.filter_by_product_category:
             categ_ids = self.product_category_ids.ids

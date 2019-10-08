@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- © 2016 Hugo Santos <hugo.santos@factorlibre.com>
      License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html). -->
-<openerp>
-  <data>
-
+<odoo>
     <record model="product.state.info" id="product_state_draft">
-        <field name="name">New</field>
+        <field name="name">In Development</field>
         <field name="code">draft</field>
     </record>
 
@@ -23,6 +21,4 @@
         <field name="name">Obsolete</field>
         <field name="code">obsolete</field>
     </record>
-
-  </data>
-</openerp>
+</odoo>
