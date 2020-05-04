@@ -1,9 +1,8 @@
-==================================
-Computed Purchase Order + Discount
-==================================
+=============================
+Product - Average Consumption
+=============================
 
-Añade y calcula el descuento de la información del proveedor (si la tiene) y la usa
-para la compra calculada
+Módulo que calcula el consumo medio de los productos y lo muestra en la ficha
 
 Installation
 ============

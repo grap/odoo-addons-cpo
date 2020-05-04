@@ -1,9 +1,8 @@
-==================================
-Computed Purchase Order + Discount
-==================================
+===================================
+Product - Average Consumption Rules
+===================================
 
-Añade y calcula el descuento de la información del proveedor (si la tiene) y la usa
-para la compra calculada
+Módulo que establece una reglas para el cálculo del consumo medio de los productos
 
 Installation
 ============
@@ -18,7 +17,9 @@ No requiere ninguna consideración especial para su configuración
 Usage
 =====
 
-Este modulo no añade ninguna funcionalidad al ERP
+En la configuración de Inventario aparece una nueva sección para incluir reglas de consumo.
+Estas reglas de consumo recogen la fecha inicia y final y las localizaciones de almacén sombre las que tendrá efecto y si 
+se activan o no para el cálculo.
 
 Other technical keys
 =====================

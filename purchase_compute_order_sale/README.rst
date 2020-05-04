@@ -1,9 +1,8 @@
-==================================
-Computed Purchase Order + Discount
-==================================
+==============================
+Computed Purchase Order - Sale
+==============================
 
-Añade y calcula el descuento de la información del proveedor (si la tiene) y la usa
-para la compra calculada
+Módulo de unión que permite incluir borradores de órdenes de venta en el cálculo de orden de compra.
 
 Installation
 ============
@@ -29,6 +28,7 @@ Contributors
 ------------
 
 * Álvaro Marcos <alvaro.marcos@factorlibre.com>
+* Hugo Santos <hugo.santos@factorlibre.com>
 
 Maintainer
 ----------
