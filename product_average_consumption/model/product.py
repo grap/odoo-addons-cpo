@@ -22,8 +22,8 @@
 
 import time
 import datetime
-from openerp import models, fields, api
-from openerp.tools.float_utils import float_round
+from odoo import models, fields, api, _
+from odoo.tools.float_utils import float_round
 
 
 class ProductProduct(models.Model):
@@ -64,7 +64,9 @@ class ProductProduct(models.Model):
     def _min_date(self):
         self.ensure_one()
         query = """SELECT to_char(min(date), 'YYYY-MM-DD') \
-                from stock_move where product_id = %s""" % (self.id)
+                from stock_move
+                where product_id = %s
+                GROUP BY product_id""" % (self.id)
         self.env.cr.execute(query)
         results = self.env.cr.fetchall()
         return results and results[0] and results[0][0] \
