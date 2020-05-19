@@ -25,11 +25,8 @@ class ProductProduct(models.Model):
             sale_ids = self.env['sale.order'].search([
                 ('date_order', '>=', date)
             ]).ids
-            line_ids = self.env['sale.order.line'].search([
-                ('state', 'in', parametres),
-                ('order_id', 'in', sale_ids),
-                ('product_id', '=', product.id)
-            ])
+            domain = self._get_average_consumption_domain(parametres, sale_ids)
+            line_ids = self.env['sale.order.line'].search(domain)
             consumption = 0
             nb_days = (datetime.datetime.today() -
                        datetime.datetime.strptime(
@@ -56,11 +53,8 @@ class ProductProduct(models.Model):
                 ('date_order', '>=', date),
                 ('initial_order', '=', False)
             ]).ids
-        line_ids = self.env['sale.order.line'].search([
-            ('state', 'in', parametres),
-            ('order_id', 'in', sale_ids),
-            ('product_id', '=', self.id)
-        ])
+        domain = self._get_average_consumption_domain(parametres, sale_ids)
+        line_ids = self.env['sale.order.line'].search(domain)
         consumption = 0
         nb_days = (datetime.datetime.today() -
                    datetime.datetime.strptime(
@@ -89,14 +83,8 @@ class ProductProduct(models.Model):
     def _get_draft_outgoing_qty(self):
         super(ProductProduct, self)._get_draft_outgoing_qty()
         sol_obj = self.env['sale.order.line']
-        sale_ids = self.env['sale.order'].search([
-            ('initial_order', '=', True),
-        ]).ids
-        sol_ids = sol_obj.search([
-            ('state', '=', 'draft'),
-            ('order_id', 'in', sale_ids),
-            ('product_id', 'in', [p.id for p in self])
-        ])
+        domain = self._get_pvi_outgoing_product_qty_domain()
+        sol_ids = sol_obj.search(domain)
         draft_qty = {}
         for line in sol_ids:
             draft_qty.setdefault(line.product_id.id, 0)
@@ -105,3 +93,19 @@ class ProductProduct(models.Model):
                 * line.product_id.uom_id.factor
         for pp in self:
             pp.draft_outgoing_qty -= draft_qty.get(pp.id, 0)
+
+
+    @api.multi
+    def _get_pvi_outgoing_product_qty_domain(self):
+        sale_ids = self.env['sale.order'].search([
+            ('initial_order', '=', True),
+        ]).ids
+        return [('state', '=', 'draft'),
+                ('order_id', 'in', sale_ids),
+                ('product_id', 'in', self.ids)]
+
+    @api.multi
+    def _get_average_consumption_domain(self, parametres, sale_ids):
+        return [('state', 'in', parametres),
+                ('order_id', 'in', sale_ids),
+                ('product_id', '=', self.id)]
