@@ -25,18 +25,6 @@
     'name': 'Computed Purchase Order - Sale',
     'version': '11.0.1.0.0',
     'category': 'Purchase',
-    'description': """
-Glue module that allow to include draft sale_orders in the
-purchase_compute_order calculation.
-==========================================================
-===================================
-
-Contacts :
-----------
-    * Julien WESTE;
-    * Sylvain LE GAL (https://twitter.com/legalsylvain);
-    * <informatique@grap.coop> for any help or question about this module.
-    """,
     'author': 'GRAP',
     'website': 'http://www.grap.coop',
     'license': 'AGPL-3',

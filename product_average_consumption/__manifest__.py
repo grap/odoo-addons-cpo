@@ -23,18 +23,6 @@
     'name': 'Product - Average Consumption',
     'version': '11.0.1.0.0',
     'category': 'Product',
-    'description': """
-Shows figures in the product form about the average consumption of products
-===========================================================================
-
-Copyright, Author and Licence :
--------------------------------
-    * Copyright : 2013-Today, Groupement Régional Alimentaire de Proximité;
-    * Author :
-        * Julien WESTE;
-        * Sylvain LE GAL (https://twitter.com/legalsylvain);
-    * Licence : AGPL-3 (http://www.gnu.org/licenses/)
-    """,
     'author': 'GRAP',
     'website': 'http://www.grap.coop',
     'license': 'AGPL-3',
