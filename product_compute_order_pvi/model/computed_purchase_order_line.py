@@ -23,11 +23,13 @@ class ComputedPurchaseOrderLine(models.Model):
             if cpol.product_id.id:
                 pvi = [True]
                 parametres = ['draft']
-                cpol.pvi_draft_qty = cpol.product_id.\
-                    custom_average_consumption(parametres, pvi)[0]
-                parametres = ['pvi_confirmed']
-                cpol.pvi_qty = cpol.product_id.\
-                    custom_average_consumption(parametres, pvi)[0]
+                if cpol.computed_purchase_order_id.compute_pvi_d_quantity:
+                    cpol.pvi_draft_qty = cpol.product_id.\
+                        custom_average_consumption(parametres, pvi)[0]
+                if cpol.computed_purchase_order_id.compute_pvi_quantity:
+                    parametres = ['pvi_confirmed']
+                    cpol.pvi_qty = cpol.product_id.\
+                        custom_average_consumption(parametres, pvi)[0]
 
     @api.multi
     def _get_computed_qty(self):
