@@ -32,7 +32,6 @@ class ProductProduct(models.Model):
         super(ProductProduct, self)._get_draft_outgoing_qty()
         domain = self._get_outgoing_product_qty_domain()
         sol_obj = self.env['sale.order.line']
-
         sol_ids = sol_obj.search(domain)
         draft_qty = {}
         for line in sol_ids:
@@ -45,4 +44,6 @@ class ProductProduct(models.Model):
 
     @api.multi
     def _get_outgoing_product_qty_domain(self):
-        return [('state', '=', 'draft'), ('product_id', 'in', self.ids)]
+        return [
+            ('order_id.state', '=', 'draft'),
+            ('product_id', 'in', self.ids)]
