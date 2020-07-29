@@ -60,7 +60,7 @@ class ProductProduct(models.Model):
                    datetime.datetime.strptime(
                    min(self._min_date(), date), '%Y-%m-%d')).days or 1.0
         for line in line_ids:
-            if line.state == 'pvi_confirmed':
+            if line.order_id.state == 'pvi_confirmed':
                 consumption += line.uom_remaining_qty
             else:
                 consumption += line.product_uom_qty
