@@ -100,12 +100,12 @@ class ProductProduct(models.Model):
         sale_ids = self.env['sale.order'].search([
             ('initial_order', '=', True),
         ]).ids
-        return [('state', '=', 'draft'),
+        return [('order_id.state', '=', 'draft'),
                 ('order_id', 'in', sale_ids),
                 ('product_id', 'in', self.ids)]
 
     @api.multi
     def _get_average_consumption_domain(self, parametres, sale_ids):
-        return [('state', 'in', parametres),
+        return [('order_id.state', 'in', parametres),
                 ('order_id', 'in', sale_ids),
                 ('product_id', '=', self.id)]
