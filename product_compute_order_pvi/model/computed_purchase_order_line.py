@@ -35,7 +35,7 @@ class ComputedPurchaseOrderLine(models.Model):
     @job(default_channel='root.update_computed_qty')
     @api.multi
     def _get_computed_qty(self):
-        """ Update compuyted purchase order quantities """
+        """ Update computed purchase order quantities """
         self._pvi_qty_available()
         self._product_qty_available()
         for cpol in self:
