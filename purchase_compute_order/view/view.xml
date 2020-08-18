@@ -54,6 +54,14 @@
                                 help="Compute the optimal purchase quantities of selected products according to the objective."
                                 states="draft"/>
                         </group>
+                        <group>
+                          <button name="update_computed_qty"
+                              type="object"
+                              string="Update Computed Qty"
+                              help="Update the computed quantities of lines according to the product stock."
+                              states="draft"/>
+                          <field nolabel='1' name="last_job"/>
+                        </group>
                         <group string="Result">
                             <field name="computed_amount"/>
                             <field name="computed_duration"/>
