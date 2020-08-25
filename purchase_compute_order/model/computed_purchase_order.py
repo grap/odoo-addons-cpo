@@ -318,6 +318,8 @@ class ComputedPurchaseOrder(models.Model):
                 resto = quantity % package_quantity
                 if resto:
                     quantity = quantity + package_quantity - resto
+            if quantity < 0:
+                quantity = 0
             line.write({'purchase_qty': quantity or 0,
                         'temp_value': temp_value,
                         'supplier': psi.id}
