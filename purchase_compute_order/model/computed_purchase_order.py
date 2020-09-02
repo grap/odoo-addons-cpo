@@ -413,7 +413,8 @@ class ComputedPurchaseOrder(models.Model):
         result = self.env.cr.fetchall()
         tmpl_ids = [r[0] for r in result]
         product_domain = [
-            ('product_tmpl_id', 'in', tmpl_ids)
+            ('product_tmpl_id', 'in', tmpl_ids),
+            ('type', '!=', 'service')
         ]
         return product_domain
 
