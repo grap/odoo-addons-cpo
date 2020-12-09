@@ -35,7 +35,7 @@ class ComputedPurchaseOrderLine(models.Model):
         """ one.""")
     product_price = fields.Float(
         'Supplier Product Price',
-        digits_compute=dp.get_precision('Product Price'))
+        digits=dp.get_precision('Product Price'))
     product_price_inv = fields.Float(
         'Supplier Product Price',
         compute='_update_product_information', inverse='_set_product_price')
