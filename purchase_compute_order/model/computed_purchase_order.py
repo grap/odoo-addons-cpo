@@ -150,7 +150,7 @@ class ComputedPurchaseOrder(models.Model):
         """ least the weight specified""", default='product_price_inv')
     computed_amount = fields.Float(
         string='Amount of the computed order',
-        digits_compute=dp.get_precision('Product Price'),
+        digits=dp.get_precision('Product Price'),
         compute='_get_computed_amount_duration',
         multi='computed_amount_duration')
     computed_duration = fields.Integer(

@@ -73,7 +73,7 @@ class ComputedPurchaseOrderLine(models.Model):
         """ one.""")
     product_price = fields.Float(
         'Supplier Product Price',
-        digits_compute=dp.get_precision('Product Price'))
+        digits=dp.get_precision('Product Price'))
     product_price_inv = fields.Float(
         'Supplier Product Price',
         compute='_get_product_information', inverse='_set_product_price')
@@ -116,7 +116,7 @@ class ComputedPurchaseOrderLine(models.Model):
     computed_qty = fields.Float(
         string='Computed Stock',
         help="The sum of all quantities selected.",
-        digits_compute=dp.get_precision('Product UoM'))
+        digits=dp.get_precision('Product UoM'))
     supplier = fields.Many2one('product.supplierinfo', 'Supplier')
     temp_value = fields.Float("Temporal value")
 
