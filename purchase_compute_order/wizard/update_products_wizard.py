@@ -105,10 +105,10 @@ class UpdateProductsLineWizard(models.TransientModel):
     _description = "Information about products to update"
 
     wizard_id = fields.Many2one(
-        'update.products.wizard', 'Wizard Reference', select=True)
+        'update.products.wizard', 'Wizard Reference', index=True)
     product_id = fields.Many2one(
         'product.product', 'Product', required=True, ondelete='cascade',
-        select=True)
+        index=True)
     supplierinfo_id = fields.Many2one(
         'product.supplierinfo', 'Partner Information', required=True,
         ondelete='cascade')
@@ -139,4 +139,4 @@ class UpdateProductsLineWizard(models.TransientModel):
         " Measure of the product otherwise")
     computed_purchase_order_line_id = fields.Many2one(
         'computed.purchase.order.line', 'Ligne de Calcul', required=True,
-        ondelete='cascade', select=True)
+        ondelete='cascade', index=True)
