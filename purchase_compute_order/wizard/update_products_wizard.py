@@ -133,7 +133,7 @@ class UpdateProductsLineWizard(models.TransientModel):
         " otherwise.")
     price = fields.Float(
         'Unit Price', required=True,
-        digits_compute=dp.get_precision('Product Price'),
+        digits=dp.get_precision('Product Price'),
         help="This price will be considered as a price for the"
         " supplier Unit of Measure if any or the default Unit of"
         " Measure of the product otherwise")
