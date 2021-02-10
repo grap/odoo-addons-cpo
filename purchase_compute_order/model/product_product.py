@@ -33,8 +33,6 @@ class ProductTemplate(models.Model):
 
     @api.multi
     def _calc_principal_supplier(self):
-        # import pdb; pdb.set_trace()
-        # seller_ids.orderby('secuency')
         for prod in self:
             prod.principal_supplier = self.env['product.supplierinfo'].search([
                 ('id', 'in', prod.seller_ids.ids)], order="sequence", limit=1)

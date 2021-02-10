@@ -465,7 +465,8 @@ class ComputedPurchaseOrder(models.Model):
                         # 'package_quantity': psi and (
                         #     (hasattr(psi[0], 'package_qty') and
                         #      psi[0].package_qty) or psi[0].min_qty) or 1.0,
-                        'average_consumption': pp.average_consumption,
+                        'average_consumption':
+                            self.get_product_average_consumption(pp),
                         'uom_po_id':
                             psi and psi[0].product_uom.id or pp.uom_po_id.id,
                     }))
@@ -549,3 +550,8 @@ class ComputedPurchaseOrder(models.Model):
         })
 
         return self._open_purchase_order_action(po_id.id)
+
+    @api.multi
+    def get_product_average_consumption(self, product_id):
+        self.ensure_one()
+        return product_id.average_consumption

@@ -142,16 +142,20 @@ class ComputedPurchaseOrderLine(models.Model):
     def _product_qty_available(self):
         for cpol in self:
             if cpol.product_id.id:
-                product_qty = cpol.product_id._product_available()[
-                    cpol.product_id.id]
+                product_id = cpol.change_product_context(cpol.product_id)
+                product_qty = product_id._product_available()[product_id.id]
                 cpol.write({
                     'qty_available': product_qty['qty_available'],
                     'outgoing_qty': product_qty['outgoing_qty'],
                     'incoming_qty': product_qty['incoming_qty'],
-                    'draft_incoming_qty': cpol.product_id.draft_incoming_qty,
-                    'draft_outgoing_qty': cpol.product_id.draft_outgoing_qty,
+                    'draft_incoming_qty': product_id.draft_incoming_qty,
+                    'draft_outgoing_qty': product_id.draft_outgoing_qty,
                 })
 
+    @api.multi
+    def change_product_context(self, product_id):
+        # Allow to change the context of the products
+        return product_id
 
     @job(default_channel='root.update_computed_qty')
     @api.multi
@@ -314,7 +318,8 @@ class ComputedPurchaseOrderLine(models.Model):
             self.uom_po_id = pp.uom_id.id
             self.product_price_inv = 0
             self.package_quantity_inv = 0
-            self.average_consumption = pp.average_consumption
+
+            self.average_consumption = cpo.get_product_average_consumption(pp)
 
             # If product is in the supplierinfo,
             # retrieve values and set state up_to_date
