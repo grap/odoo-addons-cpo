@@ -53,10 +53,8 @@ class ProductProduct(models.Model):
         """
         product_ids = [p.id for p in self]
         pol_model = self.env['purchase.order.line']
-        pol_ids = pol_model.search([
-            ('state', '=', 'draft'),
-            ('product_id', 'in', product_ids)
-        ])
+        pol_ids = pol_model.search(
+            self._get_draft_incoming_qty_domain(product_ids))
         draft_qty = {}
 
         for pol in pol_ids:
@@ -67,6 +65,13 @@ class ProductProduct(models.Model):
 
         for product in self:
             product.draft_incoming_qty = draft_qty.get(product.id, 0)
+
+    @api.multi
+    def _get_draft_incoming_qty_domain(self, product_ids):
+        return [
+            ('state', '=', 'draft'),
+            ('product_id', 'in', product_ids)
+        ]
 
     @api.multi
     def _get_draft_outgoing_qty(self):
