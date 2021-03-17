@@ -45,5 +45,5 @@ class ProductProduct(models.Model):
     @api.multi
     def _get_outgoing_product_qty_domain(self):
         return [
-            ('order_id.state', '=', 'draft'),
+            ('order_id.state', 'in', ['draft', 'sent']),
             ('product_id', 'in', self.ids)]
