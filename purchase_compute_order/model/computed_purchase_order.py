@@ -320,7 +320,7 @@ class ComputedPurchaseOrder(models.Model):
                     quantity = quantity + package_quantity - resto
             if quantity < 0:
                 quantity = 0
-            line.write({'purchase_qty': ceil(round(quantity, 2)) or 0,
+            line.write({'purchase_qty': ceil(round(quantity, 1)) or 0,
                         'temp_value': temp_value,
                         'supplier': psi.id}
                        )
@@ -383,7 +383,7 @@ class ComputedPurchaseOrder(models.Model):
                 target, field_list_dict, qty_tmp)
 
         for line in cpo.line_ids:
-            line.write({'purchase_qty': ceil(round(qty_tmp[line.id][0], 2)),
+            line.write({'purchase_qty': ceil(round(qty_tmp[line.id][0], 1)),
                         'temp_value': qty_tmp[line.id][1],
                         'supplier': qty_tmp[line.id][2].id}
                        )
