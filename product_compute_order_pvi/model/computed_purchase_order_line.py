@@ -22,14 +22,15 @@ class ComputedPurchaseOrderLine(models.Model):
     def _pvi_qty_available(self):
         for cpol in self:
             if cpol.product_id.id:
+                product_id = cpol.change_product_context(cpol.product_id)
                 pvi = [True]
                 parametres = ['draft']
                 if cpol.computed_purchase_order_id.compute_pvi_d_quantity:
-                    cpol.pvi_draft_qty = cpol.product_id.\
+                    cpol.pvi_draft_qty = product_id.\
                         custom_average_consumption(parametres, pvi)[0]
                 if cpol.computed_purchase_order_id.compute_pvi_quantity:
                     parametres = ['pvi_confirmed']
-                    cpol.pvi_qty = cpol.product_id.\
+                    cpol.pvi_qty = product_id.\
                         custom_average_consumption(parametres, pvi)[0]
 
     @job(default_channel='root.update_computed_qty')
