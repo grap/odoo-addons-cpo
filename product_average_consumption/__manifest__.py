@@ -21,7 +21,7 @@
 ##############################################################################
 {
     'name': 'Product - Average Consumption',
-    'version': '11.0.1.0.0',
+    'version': '11.0.1.1.0',
     'category': 'Product',
     'author': 'GRAP',
     'website': 'http://www.grap.coop',
@@ -33,6 +33,7 @@
     ],
     'data': [
         'view/view.xml',
+        'view/res_config_settings_view.xml'
     ],
     'installable': True,
 }
