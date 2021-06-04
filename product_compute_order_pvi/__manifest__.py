@@ -8,7 +8,7 @@
     'license': 'AGPL-3',
     'depends': [
         'purchase_compute_order',
-        'purchase_initial_order',
+        'sale_initial_order',
         'sale',
     ],
     'data': [
