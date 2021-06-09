@@ -495,12 +495,13 @@ class ComputedPurchaseOrder(models.Model):
     def update_computed_qty(self):
         job_env = self.env['queue.job']
         job_delay = self.line_ids.with_delay()._get_computed_qty()
-        job = job_env.search([
-            ('uuid', '=', job_delay.uuid)
-        ], limit=1)
-        self.write({
-            'last_job': job.id
-        })
+        if job_delay:
+            job = job_env.search([
+                ('uuid', '=', job_delay.uuid)
+            ], limit=1)
+            self.write({
+                'last_job': job.id
+            })
 
     @api.multi
     def _get_purchase_order_vals(self, po_lines):
