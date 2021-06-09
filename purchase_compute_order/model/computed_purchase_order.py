@@ -190,7 +190,7 @@ class ComputedPurchaseOrder(models.Model):
     @api.model
     def create(self, vals):
         if vals.get('name', self._DEFAULT_NAME) == self._DEFAULT_NAME:
-            vals['name'] = self.env['ir.sequence'].get(
+            vals['name'] = self.env['ir.sequence'].next_by_code(
                 'computed.purchase.order') or '/'
         return super(ComputedPurchaseOrder, self).create(vals)
 
