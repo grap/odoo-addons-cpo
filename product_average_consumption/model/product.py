@@ -19,7 +19,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
 import time
 import datetime
 from odoo import models, fields, api, _
@@ -222,9 +221,10 @@ class ProductProduct(models.Model):
             datetime.datetime.today() -
             datetime.timedelta(days=n_days)).strftime('%Y-%m-%d')
         ctx = dict(self.env.context)
-        ctx.update({
-            'from_date': begin_date
-        })
+        if not ctx.get('from_date'):
+            ctx.update({
+                'from_date': begin_date
+            })
         domain_products = [('product_id', 'in', product_ids)]
         domain_move_out = []
         domain_location = self._get_average_consumption_location_domain()
