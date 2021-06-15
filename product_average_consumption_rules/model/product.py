@@ -14,9 +14,12 @@ class ProductProduct(models.Model):
             datetime.datetime.today() -
             datetime.timedelta(days=n_days)).strftime('%Y-%m-%d')
         ctx = dict(self.env.context)
-        ctx.update({
-            'from_date': begin_date
-        })
+        if ctx.get('from_date') and ctx.get('force_from_date'):
+            begin_date = ctx['from_date']
+        else:
+            ctx.update({
+                'from_date': begin_date
+            })
         domain_products = [('product_id', 'in', product_ids)]
         domain_move_out = []
         domain_location = self._get_average_consumption_location_domain()

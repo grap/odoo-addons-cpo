@@ -221,7 +221,9 @@ class ProductProduct(models.Model):
             datetime.datetime.today() -
             datetime.timedelta(days=n_days)).strftime('%Y-%m-%d')
         ctx = dict(self.env.context)
-        if not ctx.get('from_date'):
+        if ctx.get('from_date') and ctx.get('force_from_date'):
+            begin_date = ctx['from_date']
+        else:
             ctx.update({
                 'from_date': begin_date
             })
