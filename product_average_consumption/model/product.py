@@ -96,8 +96,12 @@ class ProductProduct(models.Model):
                 precision_rounding=product.uom_id.rounding)
             first_date = max(begin_date, product.with_context(ctx)._min_date())
             if n_days == 365:
+                last_date = datetime.datetime.today()
+                if ctx.get('force_from_date') and ctx.get('to_date'):
+                    last_date = datetime.datetime.strptime(
+                        ctx['to_date'], '%Y-%m-%d')
                 nb_days = (
-                    datetime.datetime.today() -
+                    last_date -
                     datetime.datetime.strptime(first_date, '%Y-%m-%d')
                 ).days or 1.0
                 product.average_consumption = (
