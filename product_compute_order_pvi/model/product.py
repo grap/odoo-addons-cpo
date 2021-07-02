@@ -99,13 +99,16 @@ class ProductProduct(models.Model):
     def _get_pvi_outgoing_product_qty_domain(self):
         sale_ids = self.env['sale.order'].search([
             ('initial_order', '=', True),
+            ('state', 'in', ['draft', 'sent']),
         ]).ids
-        return [('order_id.state', '=', 'draft'),
-                ('order_id', 'in', sale_ids),
+        return [('order_id', 'in', sale_ids),
                 ('product_id', 'in', self.ids)]
 
     @api.multi
     def _get_average_consumption_domain(self, parametres, sale_ids):
-        return [('order_id.state', 'in', parametres),
-                ('order_id', 'in', sale_ids),
+        sale_ids = self.env['sale.order'].search([
+            ('id', 'in', sale_ids),
+            ('state', 'in', parametres),
+        ]).ids
+        return [('order_id', 'in', sale_ids),
                 ('product_id', '=', self.id)]
