@@ -450,6 +450,7 @@ class ComputedPurchaseOrder(models.Model):
             product_domain = self._active_product_stock_product_domain(
                 psi_ids.ids)
             pp_ids = pp_obj.search(product_domain)
+            pp_ids = self.filter_product_result(pp_ids)
             pp_ids.refresh()  # Clear product cache
             for pp in pp_ids:
                 if pp.id not in cpol_product_ids:
@@ -475,6 +476,10 @@ class ComputedPurchaseOrder(models.Model):
             # update line_ids
             self.write_active_product_stock(cpo, cpol_list)
         return True
+
+    @api.multi
+    def filter_product_result(self, pp_ids):
+        return pp_ids
 
     @api.multi
     def write_active_product_stock(self, cpo, cpol_list):
