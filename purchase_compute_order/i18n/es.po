@@ -667,7 +667,7 @@ msgstr "Update product_supplierinfo from compute_purchase_order"
 #. module: purchase_compute_order
 #: model:ir.ui.view,arch_db:purchase_compute_order.view_computed_purchase_order_form
 msgid "Update the computed quantities of lines according to the product stock."
-msgstr "Update the computed quantities of lines according to the product stock."
+msgstr "Actualizar las cantidades de las líneas en función de las cantidades de stock."
 
 #. module: purchase_compute_order
 #: model:ir.model.fields,field_description:purchase_compute_order.field_update_products_wizard_line_ids
@@ -719,3 +719,13 @@ msgstr ""
 #: model:ir.ui.view,arch_db:purchase_compute_order.view_update_products_form
 msgid "or"
 msgstr "o"
+
+#. module: purchase_compute_order
+#: model:ir.ui.view,arch_db:purchase_compute_order.view_computed_purchase_order_form
+msgid "Get active products and compute stock with delay"
+msgstr "Importar productos en simulación por trabajos"
+
+#. module: purchase_compute_order
+#: model:ir.model.fields,field_description:purchase_compute_order.field_computed_purchase_order_last_job_product
+msgid "Update computed product Job"
+msgstr "Trabajo de actualizar productos"

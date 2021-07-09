@@ -27,6 +27,7 @@ from math import ceil
 from openerp import models, fields, api, _, exceptions
 import openerp.addons.decimal_precision as dp
 from openerp.exceptions import ValidationError
+from odoo.addons.queue_job.job import job
 
 _logger = logging.getLogger(__name__)
 
@@ -172,7 +173,16 @@ class ComputedPurchaseOrder(models.Model):
         comodel_name='queue.job',
         string="Update computed Job", readonly=True, copy=False,
     )
-
+    last_job_product = fields.Many2one(
+        comodel_name='queue.job',
+        string="Update computed product Job", readonly=True, copy=False,
+    )
+    last_job_state = fields.Selection(
+        related='last_job.state'
+    )
+    last_job_product_state = fields.Selection(
+        related='last_job_product.state'
+    )
     # View Section
     @api.onchange('partner_id')
     def onchange_partner_id(self):
@@ -432,9 +442,23 @@ class ComputedPurchaseOrder(models.Model):
             ('name', '=', self.partner_id.id)
         ])
 
+    @api.multi
+    def compute_active_product_stock_with_delay(self):
+        job_env = self.env['queue.job']
+        job_delay = self.with_delay().compute_active_product_stock()
+        if job_delay:
+            job = job_env.search([
+                ('uuid', '=', job_delay.uuid)
+            ], limit=1)
+            self.write({
+                'last_job_product': job.id
+            })
+
     # Action section
+    @job(default_channel='root.compute_active_product')
     @api.multi
     def compute_active_product_stock(self):
+        """ Compute product list """
         pp_obj = self.env['product.product']
         for cpo in self:
             cpol_list = []
@@ -464,9 +488,6 @@ class ComputedPurchaseOrder(models.Model):
                         'package_quantity': psi and (
                              (hasattr(psi[0], 'qty_multiple') and
                               psi[0].qty_multiple)) or 1.0,
-                        # 'package_quantity': psi and (
-                        #     (hasattr(psi[0], 'package_qty') and
-                        #      psi[0].package_qty) or psi[0].min_qty) or 1.0,
                         'average_consumption':
                             self.get_product_average_consumption(pp),
                         'uom_po_id':
