@@ -19,10 +19,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
 import time
 import datetime
-from odoo import models, fields, api, _
+from odoo import models, fields, api
+from odoo.tools import pycompat
 from odoo.tools.float_utils import float_round
 
 
@@ -97,8 +97,12 @@ class ProductProduct(models.Model):
                 precision_rounding=product.uom_id.rounding)
             first_date = max(begin_date, product.with_context(ctx)._min_date())
             if n_days == 365:
+                last_date = datetime.datetime.today()
+                if ctx.get('force_from_date') and ctx.get('to_date'):
+                    last_date = datetime.datetime.strptime(
+                        ctx['to_date'], '%Y-%m-%d')
                 nb_days = (
-                    datetime.datetime.today() -
+                    last_date -
                     datetime.datetime.strptime(first_date, '%Y-%m-%d')
                 ).days or 1.0
                 product.average_consumption = (
@@ -118,23 +122,124 @@ class ProductProduct(models.Model):
                 product.average_consumption_90 = qty_out / 90 or 0.0
                 product.total_consumption_90 = qty_out or 0.0
 
+    def _get_domain_move_out_locations_average_consumption(
+            self, avg_location_ids):
+        warehouse_env = self.env['stock.warehouse']
+        if self.env.context.get('company_owned', False):
+            company_id = self.env.user.company_id.id
+            return [
+                ('location_id.company_id', '=', company_id),
+                ('location_dest_id', 'in', avg_location_ids),
+                ('location_dest_id.company_id', '=', company_id),
+            ]
+        location_ids = []
+        if self.env.context.get('location', False):
+            if isinstance(self.env.context['location'],
+                          pycompat.integer_types):
+                location_ids = [self.env.context['location']]
+            elif isinstance(self.env.context['location'],
+                            pycompat.string_types):
+                domain = [
+                    ('complete_name', 'ilike', self.env.context['location'])
+                ]
+                if self.env.context.get('force_company', False):
+                    domain += [
+                        ('company_id', '=', self.env.context['force_company'])
+                    ]
+                location_ids = self.env['stock.location'].search(domain).ids
+            else:
+                location_ids = self.env.context['location']
+        else:
+            if self.env.context.get('warehouse', False):
+                if isinstance(self.env.context['warehouse'],
+                              pycompat.integer_types):
+                    wids = [self.env.context['warehouse']]
+                elif isinstance(self.env.context['warehouse'],
+                                pycompat.string_types):
+                    domain = [('name', 'ilike', self.env.context['warehouse'])]
+                    if self.env.context.get('force_company', False):
+                        domain += [
+                            ('company_id', '=', self.env.context[
+                                'force_company'])
+                        ]
+                    wids = warehouse_env.search(domain).ids
+                else:
+                    wids = self.env.context['warehouse']
+            else:
+                wids = warehouse_env.search([]).ids
+
+            for w in warehouse_env.browse(wids):
+                location_ids.append(w.view_location_id.id)
+
+        company_id = self.env.context.get('force_company', False)
+        compute_child = self.env.context.get('compute_child', True)
+        operator = compute_child and 'child_of' or 'in'
+        domain = company_id and ['&', ('company_id', '=', company_id)] or []
+        locations = self.env['stock.location'].browse(location_ids)
+        hierarchical_locations = locations.filtered(
+            lambda location: location.parent_left != 0
+            and operator == "child_of")
+        other_locations = locations.filtered(
+            lambda location: location not in hierarchical_locations)
+        loc_domain = []
+        dest_loc_domain = [('location_dest_id', 'in', avg_location_ids)]
+        if company_id:
+            dest_loc_domain.append(
+                ('location_dest_id.company_id', '=', company_id)
+            )
+        for location in hierarchical_locations:
+            loc_domain = loc_domain and ['|'] + loc_domain or loc_domain
+            loc_domain += [
+                '&',
+                ('location_id.parent_left', '>=', location.parent_left),
+                ('location_id.parent_left', '<', location.parent_right)
+            ]
+        if other_locations:
+            loc_domain = loc_domain and ['|'] + loc_domain or loc_domain
+            loc_domain = loc_domain + [
+                ('location_id', operator, [
+                    location.id for location in other_locations])]
+        return domain + loc_domain + dest_loc_domain
+
+    @api.multi
+    def _get_average_consumption_location_domain(self):
+        company = self.env.user.company_id
+        if company.product_average_consumption_location_ids:
+            return self._get_domain_move_out_locations_average_consumption(
+                company.product_average_consumption_location_ids.ids
+            )
+        domain_quant_loc, domain_move_in_loc, domain_move_out_loc = \
+            self._get_domain_locations()
+        return domain_move_out_loc
+
+    @api.multi
+    def _get_average_consumption_states_domain(self):
+        company = self.env.user.company_id
+        states = ('confirmed', 'waiting', 'assigned', 'done')
+        if company.product_average_consumption_states:
+            states = company.product_average_consumption_states.split(',')
+        return [('state', 'in', states)]
+
     @api.multi
     def get_domain(self, product_ids, n_days):
         begin_date = (
             datetime.datetime.today() -
             datetime.timedelta(days=n_days)).strftime('%Y-%m-%d')
         ctx = dict(self.env.context)
-        ctx.update({
-            'from_date': begin_date
-        })
+        if ctx.get('from_date') and ctx.get('force_from_date'):
+            begin_date = ctx['from_date']
+        else:
+            ctx.update({
+                'from_date': begin_date
+            })
         domain_products = [('product_id', 'in', product_ids)]
         domain_move_out = []
-        domain_quant_loc, domain_move_in_loc, domain_move_out_loc = \
-            self._get_domain_locations()
+        domain_location = self._get_average_consumption_location_domain()
+        domain_states = self._get_average_consumption_states_domain()
         domain_move_out += self._get_domain_dates(ctx) \
-            + [('state', 'in', ('confirmed', 'waiting', 'assigned', 'done'))] \
+            + domain_states \
             + domain_products
-        domain_move_out += domain_move_out_loc
+        domain_move_out += domain_location
         return domain_move_out, begin_date, ctx
 
     @api.multi
