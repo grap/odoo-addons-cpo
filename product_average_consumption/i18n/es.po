@@ -6,16 +6,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-27 08:07+0000\n"
-"PO-Revision-Date: 2018-09-27 10:09+0200\n"
+"POT-Creation-Date: 2021-05-11 14:38+0000\n"
+"PO-Revision-Date: 2021-05-11 16:42+0200\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: \n"
-"Language: en\n"
-"X-Generator: Poedit 1.8.7.1\n"
+"Language: es\n"
+"X-Generator: Poedit 2.3\n"
 
 #. module: product_average_consumption
 #: model:ir.model.fields,field_description:product_average_consumption.field_product_product_average_consumption_15
@@ -38,10 +38,14 @@ msgid "Average Consumption (max 365 days)"
 msgstr "Consumo medio (máx 365 días)"
 
 #. module: product_average_consumption
-#: model:ir.model.fields,field_description:product_average_consumption.field_magento_product_product_average_consumption
-#: model:ir.model.fields,field_description:product_average_consumption.field_modula_product_product_average_consumption
-msgid "Average Consumption per day"
-msgstr "Consumo medio por día"
+#: model:ir.model.fields,help:product_average_consumption.field_res_config_settings_product_average_consumption_states
+msgid "Comma separated list of move states used to compute the average consumption of products"
+msgstr "Lista de los estados de los movimientos usados para calcular el consumo promedio de los productos (Separados por comas)"
+
+#. module: product_average_consumption
+#: model:ir.model,name:product_average_consumption.model_res_company
+msgid "Companies"
+msgstr "Compañías"
 
 #. module: product_average_consumption
 #: model:ir.ui.view,arch_db:product_average_consumption.product_normal_form_view
@@ -64,8 +68,6 @@ msgid "Consumption last 90 days"
 msgstr "Consumo últimos 90 días"
 
 #. module: product_average_consumption
-#: model:ir.model.fields,field_description:product_average_consumption.field_magento_product_product_nb_days
-#: model:ir.model.fields,field_description:product_average_consumption.field_modula_product_product_nb_days
 #: model:ir.model.fields,field_description:product_average_consumption.field_product_product_nb_days
 msgid "Number of days for the calculation"
 msgstr "Número de días para el cálculo"
@@ -76,17 +78,26 @@ msgid "Product"
 msgstr "Producto"
 
 #. module: product_average_consumption
-#: model:ir.model.fields,help:product_average_consumption.field_magento_product_product_nb_days
-#: model:ir.model.fields,help:product_average_consumption.field_modula_product_product_nb_days
+#: model:ir.ui.view,arch_db:product_average_consumption.res_config_settings_view_form
+msgid "Product Average Consumption"
+msgstr "Consumo promedio en productos"
+
+#. module: product_average_consumption
+#: model:ir.model.fields,field_description:product_average_consumption.field_res_company_product_average_consumption_states
+#: model:ir.model.fields,field_description:product_average_consumption.field_res_config_settings_product_average_consumption_states
+msgid "Product Average Consumption Move States"
+msgstr "Consumo promedio: Estados de movimientos"
+
+#. module: product_average_consumption
+#: model:ir.model.fields,field_description:product_average_consumption.field_res_company_product_average_consumption_location_ids
+#: model:ir.model.fields,field_description:product_average_consumption.field_res_config_settings_product_average_consumption_location_ids
+msgid "Product Average Consumption: Destination Locations"
+msgstr "Consumo promedio: Ubicaciones de destino"
+
+#. module: product_average_consumption
 #: model:ir.model.fields,help:product_average_consumption.field_product_product_nb_days
 msgid "The calculation will be done for the last 365 days or since the first purchase or sale of the product if it's more recent"
 msgstr "El calculo se realizará sobre los últimos 365 o desde su primera venta si el producto es más reciente"
-
-#. module: product_average_consumption
-#: model:ir.model.fields,field_description:product_average_consumption.field_magento_product_product_total_consumption
-#: model:ir.model.fields,field_description:product_average_consumption.field_modula_product_product_total_consumption
-msgid "Total Consumption"
-msgstr "Consumo total"
 
 #. module: product_average_consumption
 #: model:ir.model.fields,field_description:product_average_consumption.field_product_product_total_consumption_15
@@ -107,3 +118,8 @@ msgstr "Consumo total (ud. 90 días)"
 #: model:ir.model.fields,field_description:product_average_consumption.field_product_product_total_consumption
 msgid "Total Consumption (ud. max 365 days)"
 msgstr "Consumo total  (ud. máx 365 días)"
+
+#. module: product_average_consumption
+#: model:ir.model,name:product_average_consumption.model_res_config_settings
+msgid "res.config.settings"
+msgstr "res.config.settings"
