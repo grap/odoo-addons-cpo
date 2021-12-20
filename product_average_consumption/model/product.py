@@ -75,23 +75,45 @@ class ProductProduct(models.Model):
     @api.multi
     def _average_consumption(self):
         self.refresh()
-        product_ids = [p.id for p in self]
-        self.calculate_average_days(product_ids, 365)
-        self.calculate_average_days(product_ids, 15)
-        self.calculate_average_days(product_ids, 30)
-        self.calculate_average_days(product_ids, 90)
+        product_consumption = self.calculate_average_days_dict(365)
+        product_consumption_15 = self.calculate_average_days_dict(15)
+        product_consumption_30 = self.calculate_average_days_dict(30)
+        product_consumption_90 = self.calculate_average_days_dict(90)
+        for product in self:
+            product.nb_days = product_consumption[product.id]['nb_days']
+            product.average_consumption = product_consumption[product.id][
+                'average_consumption']
+            product.total_consumption = product_consumption[product.id][
+                'total_consumption']
+            product.average_consumption_15 = product_consumption_15[
+                product.id]['average_consumption_15']
+            product.total_consumption_15 = product_consumption_15[product.id][
+                'total_consumption_15']
+            product.average_consumption_30 = product_consumption_30[
+                product.id]['average_consumption_30']
+            product.total_consumption_30 = product_consumption_30[product.id][
+                'total_consumption_30']
+            product.average_consumption_90= product_consumption_90[
+                product.id]['average_consumption_90']
+            product.total_consumption_90 = product_consumption_90[product.id][
+                'total_consumption_90']
         return True
 
     @api.multi
-    def calculate_average_days(self, product_ids, n_days):
+    def calculate_average_days_dict(self, n_days):
         first_date = time.strftime('%Y-%m-%d')
-        domain_move_out, begin_date, ctx = self.get_domain(product_ids, n_days)
+        domain_move_out, begin_date, ctx = self.get_domain(self.ids, n_days)
         domain_move_out = self.extra_domain(domain_move_out)
         moves_out = self.env['stock.move'].read_group(
             domain_move_out, ['product_id', 'product_qty'], ['product_id'])
         moves_out = dict(map(lambda x: (x['product_id'][0], x['product_qty']),
                              moves_out))
+        product_consumption = {}
         for product in self:
+            product_consumption.setdefault(
+                product.id,
+                {}
+            )
             qty_out = float_round(
                 moves_out.get(product.id, 0.0),
                 precision_rounding=product.uom_id.rounding)
@@ -105,22 +127,48 @@ class ProductProduct(models.Model):
                     last_date -
                     datetime.datetime.strptime(first_date, '%Y-%m-%d')
                 ).days or 1.0
-                product.average_consumption = (
+                average_consumption = (
                     nb_days and qty_out / nb_days or 0.0)
-                product.total_consumption = qty_out or 0.0
-                if product.total_consumption == 0:
-                    product.nb_days = 0.0
+                total_consumption = qty_out or 0.0
+                if total_consumption == 0:
+                    nb_days = 0.0
                 else:
-                    product.nb_days = nb_days or 0.0
+                    nb_days = nb_days or 0.0
+                product_consumption[product.id]['nb_days'] = nb_days
+                product_consumption[product.id]['average_consumption'] = (
+                    average_consumption
+                )
+                product_consumption[product.id]['total_consumption'] = (
+                    total_consumption
+                )
             elif n_days == 15:
-                product.average_consumption_15 = qty_out / 15 or 0.0
-                product.total_consumption_15 = qty_out or 0.0
+                average_consumption_15 = qty_out / 15 or 0.0
+                total_consumption_15 = qty_out or 0.0
+                product_consumption[product.id]['average_consumption_15'] = (
+                    average_consumption_15
+                )
+                product_consumption[product.id]['total_consumption_15'] = (
+                    total_consumption_15
+                )
             elif n_days == 30:
-                product.average_consumption_30 = qty_out / 30 or 0.0
-                product.total_consumption_30 = qty_out or 0.0
+                average_consumption_30 = qty_out / 30 or 0.0
+                total_consumption_30 = qty_out or 0.0
+                product_consumption[product.id]['average_consumption_30'] = (
+                    average_consumption_30
+                )
+                product_consumption[product.id]['total_consumption_30'] = (
+                    total_consumption_30
+                )
             elif n_days == 90:
-                product.average_consumption_90 = qty_out / 90 or 0.0
-                product.total_consumption_90 = qty_out or 0.0
+                average_consumption_90 = qty_out / 90 or 0.0
+                total_consumption_90 = qty_out or 0.0
+                product_consumption[product.id]['average_consumption_90'] = (
+                    average_consumption_90
+                )
+                product_consumption[product.id]['total_consumption_90'] = (
+                    total_consumption_90
+                )
+        return product_consumption
 
     def _get_domain_move_out_locations_average_consumption(
             self, avg_location_ids):
