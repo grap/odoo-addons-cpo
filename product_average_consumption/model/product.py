@@ -103,6 +103,7 @@ class ProductProduct(models.Model):
     def calculate_average_days_dict(self, n_days):
         first_date = time.strftime('%Y-%m-%d')
         domain_move_out, begin_date, ctx = self.get_domain(self.ids, n_days)
+        domain_move_out = self.extra_domain(domain_move_out)
         moves_out = self.env['stock.move'].read_group(
             domain_move_out, ['product_id', 'product_qty'], ['product_id'])
         moves_out = dict(map(lambda x: (x['product_id'][0], x['product_qty']),
@@ -288,6 +289,10 @@ class ProductProduct(models.Model):
             + domain_products
         domain_move_out += domain_location
         return domain_move_out, begin_date, ctx
+
+    @api.multi
+    def extra_domain(self, domain):
+        return domain
 
     def _get_domain_dates(self, context):
         from_date = context.get('from_date', False)

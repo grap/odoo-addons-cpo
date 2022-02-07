@@ -21,8 +21,9 @@
 #
 ##############################################################################
 import logging
-from openerp import models, fields, api, _, exceptions
-import openerp.addons.decimal_precision as dp
+from odoo import models, fields, api
+import odoo.addons.decimal_precision as dp
+from odoo.addons.queue_job.job import job
 
 _logger = logging.getLogger(__name__)
 
@@ -98,22 +99,22 @@ class ComputedPurchaseOrderLine(models.Model):
         """- negative quantity : extra output ; \n"""
         """- positive quantity : extra input.""", default=0)
     qty_available = fields.Float(
-        'Quantity On Hand', compute='_product_qty_available',
+        'Quantity On Hand',
         help="The available quantity on hand for this product")
     incoming_qty = fields.Float(
-        'Incoming Quantity', compute='_product_qty_available',
-        help="Virtual incoming entries", store=False)
+        'Incoming Quantity',
+        help="Virtual incoming entries")
     outgoing_qty = fields.Float(
-        'Outgoing Quantity', compute='_product_qty_available',
-        help="Virtual outgoing entries", store=False)
+        'Outgoing Quantity',
+        help="Virtual outgoing entries")
     draft_incoming_qty = fields.Float(
-        'Draft Incoming Quantity', compute='_product_qty_available',
-        help="Draft purchases", store=False)
+        'Draft Incoming Quantity',
+        help="Draft purchases")
     draft_outgoing_qty = fields.Float(
-        'Draft Outgoing Quantity', compute='_product_qty_available',
-        help="Draft sales", store=False)
+        'Draft Outgoing Quantity',
+        help="Draft sales")
     computed_qty = fields.Float(
-        string='Computed Stock', compute='_get_computed_qty',
+        string='Computed Stock',
         help="The sum of all quantities selected.",
         digits=dp.get_precision('Product UoM'))
     supplier = fields.Many2one('product.supplierinfo', 'Supplier')
@@ -141,16 +142,26 @@ class ComputedPurchaseOrderLine(models.Model):
     def _product_qty_available(self):
         for cpol in self:
             if cpol.product_id.id:
-                product_qty = cpol.product_id._product_available()[
-                    cpol.product_id.id]
-                cpol.qty_available = product_qty['qty_available']
-                cpol.outgoing_qty = product_qty['outgoing_qty']
-                cpol.incoming_qty = product_qty['incoming_qty']
-                cpol.draft_incoming_qty = cpol.product_id.draft_incoming_qty
-                cpol.draft_outgoing_qty = cpol.product_id.draft_outgoing_qty
+                product_id = cpol.change_product_context(cpol.product_id)
+                product_qty = product_id._product_available()[product_id.id]
+                cpol.write({
+                    'qty_available': product_qty['qty_available'],
+                    'outgoing_qty': product_qty['outgoing_qty'],
+                    'incoming_qty': product_qty['incoming_qty'],
+                    'draft_incoming_qty': product_id.draft_incoming_qty,
+                    'draft_outgoing_qty': product_id.draft_outgoing_qty,
+                })
 
     @api.multi
+    def change_product_context(self, product_id):
+        # Allow to change the context of the products
+        return product_id
+
+    @job(default_channel='root.update_computed_qty')
+    @api.multi
     def _get_computed_qty(self):
+        """ Update computed purchase order quantities """
+        self._product_qty_available()
         for cpol in self:
             computed_qty = cpol.qty_available
             if cpol.computed_purchase_order_id.compute_pending_quantity:
@@ -307,7 +318,8 @@ class ComputedPurchaseOrderLine(models.Model):
             self.uom_po_id = pp.uom_id.id
             self.product_price_inv = 0
             self.package_quantity_inv = 0
-            self.average_consumption = pp.average_consumption
+
+            self.average_consumption = cpo.get_product_average_consumption(pp)
 
             # If product is in the supplierinfo,
             # retrieve values and set state up_to_date

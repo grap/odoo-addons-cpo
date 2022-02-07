@@ -27,6 +27,7 @@ from math import ceil
 from openerp import models, fields, api, _, exceptions
 import openerp.addons.decimal_precision as dp
 from openerp.exceptions import ValidationError
+from odoo.addons.queue_job.job import job
 
 _logger = logging.getLogger(__name__)
 
@@ -168,7 +169,20 @@ class ComputedPurchaseOrder(models.Model):
     product_price = fields.Selection(
         '_get_product_price_selection',
         'Product price based on', default='product_price')
-
+    last_job = fields.Many2one(
+        comodel_name='queue.job',
+        string="Update computed Job", readonly=True, copy=False,
+    )
+    last_job_product = fields.Many2one(
+        comodel_name='queue.job',
+        string="Update computed product Job", readonly=True, copy=False,
+    )
+    last_job_state = fields.Selection(
+        related='last_job.state'
+    )
+    last_job_product_state = fields.Selection(
+        related='last_job_product.state'
+    )
     # View Section
     @api.onchange('partner_id')
     def onchange_partner_id(self):
@@ -186,7 +200,7 @@ class ComputedPurchaseOrder(models.Model):
     @api.model
     def create(self, vals):
         if vals.get('name', self._DEFAULT_NAME) == self._DEFAULT_NAME:
-            vals['name'] = self.env['ir.sequence'].get(
+            vals['name'] = self.env['ir.sequence'].next_by_code(
                 'computed.purchase.order') or '/'
         return super(ComputedPurchaseOrder, self).create(vals)
 
@@ -314,7 +328,9 @@ class ComputedPurchaseOrder(models.Model):
                 resto = quantity % package_quantity
                 if resto:
                     quantity = quantity + package_quantity - resto
-            line.write({'purchase_qty': quantity or 0,
+            if quantity < 0:
+                quantity = 0
+            line.write({'purchase_qty': ceil(round(quantity, 1)) or 0,
                         'temp_value': temp_value,
                         'supplier': psi.id}
                        )
@@ -377,7 +393,7 @@ class ComputedPurchaseOrder(models.Model):
                 target, field_list_dict, qty_tmp)
 
         for line in cpo.line_ids:
-            line.write({'purchase_qty': qty_tmp[line.id][0],
+            line.write({'purchase_qty': ceil(round(qty_tmp[line.id][0], 1)),
                         'temp_value': qty_tmp[line.id][1],
                         'supplier': qty_tmp[line.id][2].id}
                        )
@@ -413,7 +429,8 @@ class ComputedPurchaseOrder(models.Model):
         result = self.env.cr.fetchall()
         tmpl_ids = [r[0] for r in result]
         product_domain = [
-            ('product_tmpl_id', 'in', tmpl_ids)
+            ('product_tmpl_id', 'in', tmpl_ids),
+            ('type', '!=', 'service')
         ]
         return product_domain
 
@@ -425,9 +442,23 @@ class ComputedPurchaseOrder(models.Model):
             ('name', '=', self.partner_id.id)
         ])
 
+    @api.multi
+    def compute_active_product_stock_with_delay(self):
+        job_env = self.env['queue.job']
+        job_delay = self.with_delay().compute_active_product_stock()
+        if job_delay:
+            job = job_env.search([
+                ('uuid', '=', job_delay.uuid)
+            ], limit=1)
+            self.write({
+                'last_job_product': job.id
+            })
+
     # Action section
+    @job(default_channel='root.compute_active_product')
     @api.multi
     def compute_active_product_stock(self):
+        """ Compute product list """
         pp_obj = self.env['product.product']
         for cpo in self:
             cpol_list = []
@@ -443,6 +474,7 @@ class ComputedPurchaseOrder(models.Model):
             product_domain = self._active_product_stock_product_domain(
                 psi_ids.ids)
             pp_ids = pp_obj.search(product_domain)
+            pp_ids = self.filter_product_result(pp_ids)
             pp_ids.refresh()  # Clear product cache
             for pp in pp_ids:
                 if pp.id not in cpol_product_ids:
@@ -456,10 +488,8 @@ class ComputedPurchaseOrder(models.Model):
                         'package_quantity': psi and (
                              (hasattr(psi[0], 'qty_multiple') and
                               psi[0].qty_multiple)) or 1.0,
-                        # 'package_quantity': psi and (
-                        #     (hasattr(psi[0], 'package_qty') and
-                        #      psi[0].package_qty) or psi[0].min_qty) or 1.0,
-                        'average_consumption': pp.average_consumption,
+                        'average_consumption':
+                            self.get_product_average_consumption(pp),
                         'uom_po_id':
                             psi and psi[0].product_uom.id or pp.uom_po_id.id,
                     }))
@@ -467,6 +497,10 @@ class ComputedPurchaseOrder(models.Model):
             # update line_ids
             self.write_active_product_stock(cpo, cpol_list)
         return True
+
+    @api.multi
+    def filter_product_result(self, pp_ids):
+        return pp_ids
 
     @api.multi
     def write_active_product_stock(self, cpo, cpol_list):
@@ -482,6 +516,18 @@ class ComputedPurchaseOrder(models.Model):
             res = self._compute_purchase_quantities_other(
                 field=cpo.target_type)
         return res
+
+    @api.multi
+    def update_computed_qty(self):
+        job_env = self.env['queue.job']
+        job_delay = self.line_ids.with_delay()._get_computed_qty()
+        if job_delay:
+            job = job_env.search([
+                ('uuid', '=', job_delay.uuid)
+            ], limit=1)
+            self.write({
+                'last_job': job.id
+            })
 
     @api.multi
     def _get_purchase_order_vals(self, po_lines):
@@ -532,3 +578,8 @@ class ComputedPurchaseOrder(models.Model):
         })
 
         return self._open_purchase_order_action(po_id.id)
+
+    @api.multi
+    def get_product_average_consumption(self, product_id):
+        self.ensure_one()
+        return product_id.average_consumption
