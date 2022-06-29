@@ -303,19 +303,3 @@ class ProductProduct(models.Model):
         if to_date:
             domain.append(('date', '<=', to_date))
         return domain
-
-    def _export_rows_record_extra_prefetch(self, fields, records):
-        super()._export_rows_record_extra_prefetch(fields, records)
-        flatten_fields = [f_name[0] for f_name in fields]
-        consumption_fields = [
-            "average_consumption",
-            "total_consumption",
-            "average_consumption_15",
-            "total_consumption_15",
-            "average_consumption_30",
-            "total_consumption_30",
-            "average_consumption_90",
-            "total_consumption_90",
-        ]
-        if any(cons_field in flatten_fields for cons_field in consumption_fields):
-            records._average_consumption()
