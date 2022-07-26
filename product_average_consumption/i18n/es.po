@@ -6,16 +6,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-11 14:38+0000\n"
-"PO-Revision-Date: 2021-05-11 16:42+0200\n"
+"POT-Creation-Date: 2022-07-28 10:57+0000\n"
+"PO-Revision-Date: 2022-07-28 12:58+0200\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: \n"
-"Language: es\n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 3.1.1\n"
 
 #. module: product_average_consumption
 #: model:ir.model.fields,field_description:product_average_consumption.field_product_product_average_consumption_15
@@ -93,6 +93,11 @@ msgstr "Consumo promedio: Estados de movimientos"
 #: model:ir.model.fields,field_description:product_average_consumption.field_res_config_settings_product_average_consumption_location_ids
 msgid "Product Average Consumption: Destination Locations"
 msgstr "Consumo promedio: Ubicaciones de destino"
+
+#. module: product_average_consumption
+#: model:ir.model.fields,field_description:product_average_consumption.field_res_config_settings_product_average_consumption_order_dates
+msgid "Product Average Consumption: Order dates"
+msgstr "Consumo promedio: Fecha para calculo de consumo"
 
 #. module: product_average_consumption
 #: model:ir.model.fields,help:product_average_consumption.field_product_product_nb_days

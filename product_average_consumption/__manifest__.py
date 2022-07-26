@@ -20,20 +20,17 @@
 #
 ##############################################################################
 {
-    'name': 'Product - Average Consumption',
-    'version': '11.0.1.1.0',
-    'category': 'Product',
-    'author': 'GRAP',
-    'website': 'http://www.grap.coop',
-    'license': 'AGPL-3',
-    'license': 'AGPL-3',
-    'depends': [
-        'product',
-        'stock',
+    "name": "Product - Average Consumption",
+    "version": "11.0.1.1.0",
+    "category": "Product",
+    "author": "GRAP",
+    "website": "http://www.grap.coop",
+    "license": "AGPL-3",
+    "license": "AGPL-3",
+    "depends": [
+        "product",
+        "stock",
     ],
-    'data': [
-        'view/view.xml',
-        'view/res_config_settings_view.xml'
-    ],
-    'installable': True,
+    "data": ["view/view.xml", "view/res_config_settings_view.xml"],
+    "installable": True,
 }

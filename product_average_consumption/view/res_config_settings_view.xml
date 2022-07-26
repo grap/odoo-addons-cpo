@@ -9,6 +9,16 @@
             <xpath expr="//div[@data-key='stock']" position="inside">
                 <h2>Product Average Consumption</h2>
                 <div class="row mt16 o_settings_container">
+                <div class="col-xs-12 col-md-6 o_setting_box">
+                        <div class="o_setting_right_pane">
+                            <label for="product_average_consumption_order_dates"/>
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <field name="product_average_consumption_order_dates" class="many2many_tags"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-xs-12 col-md-6 o_setting_box">
                         <div class="o_setting_right_pane">
                             <label for="product_average_consumption_states"/>
