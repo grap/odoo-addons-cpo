@@ -61,9 +61,21 @@ class ProductProduct(models.Model):
         """ more recent""")
 
     @api.multi
-    def _min_date(self):
+    def _create_date(self):
         self.ensure_one()
-        query = """SELECT to_char(min(date), 'YYYY-MM-DD') \
+        query = """SELECT to_char(min(create_date), 'YYYY-MM-DD') \
+                from stock_move
+                where product_id = %s
+                GROUP BY product_id""" % (self.id)
+        self.env.cr.execute(query)
+        results = self.env.cr.fetchall()
+        return results and results[0] and results[0][0] \
+            or time.strftime('%Y-%m-%d')
+
+    @api.multi
+    def _write_date(self):
+        self.ensure_one()
+        query = """SELECT to_char(max(write_date), 'YYYY-MM-DD') \
                 from stock_move
                 where product_id = %s
                 GROUP BY product_id""" % (self.id)
@@ -117,7 +129,13 @@ class ProductProduct(models.Model):
             qty_out = float_round(
                 moves_out.get(product.id, 0.0),
                 precision_rounding=product.uom_id.rounding)
-            first_date = max(begin_date, product.with_context(ctx)._min_date())
+            # first_date = max(begin_date, product.with_context(ctx)._min_date())
+            order_date = self.env['ir.config_parameter'].sudo().get_param('product_average_consumption_order_dates')
+            if order_date == 'create_date':
+                first_date = self._create_date()
+            if order_date =='write_date':
+                first_date = self._write_date()
+            # import pdb; pdb.set_trace()
             if n_days == 365:
                 last_date = datetime.datetime.today()
                 if ctx.get('force_from_date') and ctx.get('to_date'):
