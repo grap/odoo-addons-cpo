@@ -173,7 +173,7 @@
              <xpath expr="//group[@name='purchase']" position="after">
                  <group colspan='1' col='3'>
                     <field name="purchase_target"/>
-                    <field name="target_type" nolabel="1"/>
+                    <field name="target_type" nolabel="1" required="1"/>
                  </group>
              </xpath>
         </field>
