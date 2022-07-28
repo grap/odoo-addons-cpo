@@ -40,7 +40,7 @@ class ResPartner(models.Model):
     purchase_target = fields.Integer('Purchase Target')
     target_type = fields.Selection(
         selection='_get_target_type_selection', string='Target Type',
-        required=True,
+        required=False,
         help="This defines the amount of products you want to purchase. \n"
         "The system will compute a purchase order based on the stock"
         " you have and the average consumption of each product."
