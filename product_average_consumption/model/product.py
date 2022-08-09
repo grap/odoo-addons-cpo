@@ -146,21 +146,21 @@ class ProductProduct(models.Model):
             map(lambda x: (x["product_id"][0], x["product_qty"]), moves_out)
         )
         product_consumption = {}
+        order_date = (
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("product_average_consumption_order_dates")
+        )
         for product in self:
             product_consumption.setdefault(product.id, {})
             qty_out = float_round(
                 moves_out.get(product.id, 0.0),
                 precision_rounding=product.uom_id.rounding,
             )
-            order_date = (
-                self.env["ir.config_parameter"]
-                .sudo()
-                .get_param("product_average_consumption_order_dates")
-            )
             if order_date == "create_date":
-                first_date = self._create_date()
+                first_date = product._create_date()
             if order_date == "write_date":
-                first_date = self._write_date()
+                first_date = product._write_date()
             if n_days == 365:
                 last_date = datetime.datetime.today()
                 if ctx.get("force_from_date") and ctx.get("to_date"):
