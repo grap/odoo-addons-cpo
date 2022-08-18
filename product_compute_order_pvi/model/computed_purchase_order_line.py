@@ -24,7 +24,7 @@ class ComputedPurchaseOrderLine(models.Model):
             if cpol.product_id.id:
                 product_id = cpol.change_product_context(cpol.product_id)
                 pvi = [True]
-                parametres = ['draft']
+                parametres = ['draft', 'sent']
                 if cpol.computed_purchase_order_id.compute_pvi_d_quantity:
                     cpol.pvi_draft_qty = product_id.\
                         custom_average_consumption(parametres, pvi)[0]
