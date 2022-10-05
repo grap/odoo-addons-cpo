@@ -67,11 +67,12 @@ class ProductProduct(models.Model):
         query = """SELECT to_char(min(date), 'YYYY-MM-DD') \
                 from stock_move
                 where product_id = %s
-                GROUP BY product_id""" % (self.id)
+                GROUP BY product_id""" % (
+            self.id
+        )
         self.env.cr.execute(query)
         results = self.env.cr.fetchall()
-        return results and results[0] and results[0][0] \
-            or time.strftime('%Y-%m-%d')
+        return results and results[0] and results[0][0] or time.strftime("%Y-%m-%d")
 
     @api.multi
     def _create_date(self):
@@ -163,8 +164,15 @@ class ProductProduct(models.Model):
                 first_date = product._write_date()
             if n_days == 365:
                 last_date = datetime.datetime.today()
-                if ctx.get("force_from_date") and ctx.get("to_date"):
-                    last_date = datetime.datetime.strptime(ctx["to_date"], "%Y-%m-%d")
+                if ctx.get("force_from_date"):
+                    if ctx.get("to_date"):
+                        last_date = datetime.datetime.strptime(
+                            ctx["to_date"], "%Y-%m-%d"
+                        )
+                    if ctx.get("from_date"):
+                        first_date = datetime.datetime.strptime(
+                            ctx["from_date"], "%Y-%m-%d"
+                        )
                 nb_days = (
                     last_date - datetime.datetime.strptime(first_date, "%Y-%m-%d")
                 ).days or 1.0
